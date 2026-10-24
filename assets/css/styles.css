@@ -1,0 +1,144 @@
+/* Custom Styles for QR Web Menu */
+
+/* Hide scrollbar for horizontal nav */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Scroll margin for sections to account for sticky header */
+#food-section,
+#drinks-section {
+  scroll-margin-top: 80px; /* Adjust based on header height */
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #e94560;
+  outline-offset: 2px;
+}
+
+/* Modal animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-enter {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modal-content-enter {
+  animation: slideUp 0.3s ease-out;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Touch-friendly tap targets */
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Nav button active state */
+.nav-btn.active {
+  color: #e94560;
+}
+
+/* Language button active state */
+.lang-btn.active {
+  background-color: #e94560;
+  color: white;
+}
+
+/* Menu images */
+.menu-section img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Ensure modals don't cause horizontal scroll */
+#promo-modal,
+#birthday-modal {
+  overscroll-behavior: contain;
+}
+
+/* Visual viewport adjustment for iOS */
+@supports (padding: max(0px)) {
+  header {
+    padding-top: max(12px, env(safe-area-inset-top));
+  }
+  
+  .back-btn {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+  
+  main {
+    padding-bottom: max(80px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  :root {
+    --border-color: white;
+  }
+}
+
+/* Print styles */
+@media print {
+  header,
+  #promo-modal,
+  #birthday-modal {
+    display: none !important;
+  }
+  
+  main {
+    padding-top: 0;
+  }
+  
+  .menu-section {
+    page-break-inside: avoid;
+  }
+}

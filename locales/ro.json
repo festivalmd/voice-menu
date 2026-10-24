@@ -1,0 +1,23 @@
+{
+  "nav": {
+    "food": "FOOD",
+    "drinks": "DRINKS",
+    "promo": "PROMO SET",
+    "birthday": "BIRTHDAY OFFER"
+  },
+  "common": {
+    "back": "BACK"
+  },
+  "sections": {
+    "food": "FOOD MENU",
+    "drinks": "DRINKS MENU"
+  },
+  "promo": {
+    "title": "PROMO SET",
+    "content": "Promo content will be added here after PDF upload."
+  },
+  "birthday": {
+    "title": "BIRTHDAY OFFER",
+    "content": "Birthday offer content will be added here after PDF upload."
+  }
+}

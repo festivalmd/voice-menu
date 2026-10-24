@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a2e">
+  <meta name="description" content="Bar Menu - Scan QR to view food and drinks">
+  <title data-i18n="common.language">Bar Menu</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1a1a2e',
+            secondary: '#16213e',
+            accent: '#e94560',
+            gold: '#ffd700'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <link rel="manifest" href="/manifest.json">
+</head>
+<body class="bg-primary text-white min-h-screen font-sans antialiased">
+  <!-- Sticky Header / Navigation -->
+  <header class="sticky top-0 z-40 bg-primary/95 backdrop-blur-sm border-b border-white/10" role="banner">
+    <div class="flex items-center justify-between px-4 py-3 gap-2">
+      <!-- Logo/Brand -->
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <svg class="w-8 h-8 text-accent" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
+        </svg>
+        <span class="font-bold text-lg tracking-wide">BAR MENU</span>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <nav class="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1 flex-1 justify-center" role="navigation" aria-label="Main menu">
+        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="food" data-i18n="nav.food">FOOD</button>
+        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="drinks" data-i18n="nav.drinks">DRINKS</button>
+        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
+        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="birthday" data-i18n="nav.birthday">BIRTHDAY OFFER</button>
+      </nav>
+
+      <!-- Language Switcher -->
+      <div class="flex items-center gap-1 flex-shrink-0" role="group" aria-label="Language selection">
+        <button class="lang-btn px-3 py-1.5 text-xs font-medium rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors whitespace-nowrap" data-lang="ru" aria-label="Russian">RU</button>
+        <button class="lang-btn px-3 py-1.5 text-xs font-medium rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors whitespace-nowrap" data-lang="ro" aria-label="Romanian">RO</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content" class="pt-4 pb-20" role="main">
+    <!-- Main Menu Container - Image Based -->
+    <div id="main-menu-container">
+      
+      <!-- FOOD Section -->
+      <section id="food-section" class="menu-section px-4" aria-labelledby="food-title">
+        <h2 id="food-title" class="sr-only" data-i18n="sections.food">FOOD MENU</h2>
+        
+        <!-- Placeholder images - replace with actual JPG files -->
+        <div class="space-y-4">
+          <img src="/assets/images/menu/food-page-1.jpg" alt="Food Menu Page 1" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/food-page-2.jpg" alt="Food Menu Page 2" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/food-page-3.jpg" alt="Food Menu Page 3" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/food-page-4.jpg" alt="Food Menu Page 4" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/food-page-5.jpg" alt="Food Menu Page 5" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+        </div>
+      </section>
+
+      <!-- DRINKS Section -->
+      <section id="drinks-section" class="menu-section px-4" aria-labelledby="drinks-title">
+        <h2 id="drinks-title" class="sr-only" data-i18n="sections.drinks">DRINKS MENU</h2>
+        
+        <!-- Placeholder images - replace with actual JPG files -->
+        <div class="space-y-4">
+          <img src="/assets/images/menu/drinks-page-1.jpg" alt="Drinks Menu Page 1" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-2.jpg" alt="Drinks Menu Page 2" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-3.jpg" alt="Drinks Menu Page 3" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-4.jpg" alt="Drinks Menu Page 4" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-5.jpg" alt="Drinks Menu Page 5" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-6.jpg" alt="Drinks Menu Page 6" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-7.jpg" alt="Drinks Menu Page 7" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-8.jpg" alt="Drinks Menu Page 8" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-9.jpg" alt="Drinks Menu Page 9" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-10.jpg" alt="Drinks Menu Page 10" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/drinks-page-11.jpg" alt="Drinks Menu Page 11" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- PROMO SET Modal -->
+  <div id="promo-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="promo-title">
+    <div class="min-h-screen">
+      <!-- Sticky Back Button -->
+      <div class="sticky top-0 z-10 bg-primary/95 backdrop-blur-sm border-b border-white/10 px-4 py-3">
+        <button id="promo-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
+          <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span class="font-medium" data-i18n="common.back">BACK</span>
+        </button>
+      </div>
+
+      <!-- Modal Content - Image Based -->
+      <div class="px-4 py-6">
+        <h2 id="promo-title" class="sr-only" data-i18n="promo.title">PROMO SET</h2>
+        <div id="promo-content" class="space-y-4">
+          <img src="/assets/images/menu/promo-page-1.jpg" alt="Promo Set Page 1" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/promo-page-2.jpg" alt="Promo Set Page 2" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BIRTHDAY OFFER Modal -->
+  <div id="birthday-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="birthday-title">
+    <div class="min-h-screen">
+      <!-- Sticky Back Button -->
+      <div class="sticky top-0 z-10 bg-primary/95 backdrop-blur-sm border-b border-white/10 px-4 py-3">
+        <button id="birthday-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
+          <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+          <span class="font-medium" data-i18n="common.back">BACK</span>
+        </button>
+      </div>
+
+      <!-- Modal Content - Image Based -->
+      <div class="px-4 py-6">
+        <h2 id="birthday-title" class="sr-only" data-i18n="birthday.title">BIRTHDAY OFFER</h2>
+        <div id="birthday-content" class="space-y-4">
+          <img src="/assets/images/menu/birthday-page-1.jpg" alt="Birthday Offer Page 1" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+          <img src="/assets/images/menu/birthday-page-2.jpg" alt="Birthday Offer Page 2" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/assets/js/i18n.js"></script>
+  <script src="/assets/js/app.js"></script>
+</body>
+</html>
