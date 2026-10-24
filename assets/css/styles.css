@@ -187,8 +187,36 @@ button, a {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 8px;
   text-align: center;
+  opacity: 0;
+  transform: translateY(30px);
+  animation: heroBtnFadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Lucide Icons in hero nav */
+.lucide-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+/* Staggered entrance animation */
+.hero-nav-btn:nth-child(1) { animation-delay: 0.1s; }
+.hero-nav-btn:nth-child(2) { animation-delay: 0.2s; }
+.hero-nav-btn:nth-child(3) { animation-delay: 0.3s; }
+.hero-nav-btn:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes heroBtnFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .hero-nav-btn:focus-visible {
@@ -196,9 +224,37 @@ button, a {
   outline-offset: 2px;
 }
 
+/* Hero Icons */
+.hero-icon {
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.hero-nav-btn:hover .hero-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* Promo Text Gradient Animation */
+.promo-text {
+  background-size: 200% 200%;
+  animation: promoGradientShift 3s ease-in-out infinite;
+}
+
+@keyframes promoGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* Hero Language Buttons */
 .hero-lang-btn {
   backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(20px);
+  animation: heroBtnFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation-delay: 0.6s;
 }
 
 /* Mobile responsive adjustments for hero */
@@ -212,6 +268,11 @@ button, a {
     font-size: 0.875rem;
     padding: 0.75rem 1.25rem;
   }
+  
+  .hero-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
 }
 
 @media (max-width: 360px) {
@@ -223,6 +284,11 @@ button, a {
   .hero-lang-btn {
     font-size: 0.8125rem;
     padding: 0.625rem 1rem;
+  }
+  
+  .hero-icon {
+    width: 1.125rem;
+    height: 1.125rem;
   }
 }
 
@@ -243,9 +309,28 @@ button, a {
   animation: bounce 2s infinite;
 }
 
+.scroll-indicator {
+  animation: bounce 2s infinite;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+}
+
 /* Reduced motion for hero */
 @media (prefers-reduced-motion: reduce) {
   .animate-bounce {
+    animation: none;
+  }
+  
+  .hero-nav-btn,
+  .hero-lang-btn {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  .promo-text {
     animation: none;
   }
 }

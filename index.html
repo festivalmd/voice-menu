@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#1a1a2e">
   <meta name="description" content="Bar Menu - Scan QR to view food and drinks">
-  <title>Bar Menu</title>
+  <title>MENU VOICE CLUB</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -32,7 +32,7 @@
       <nav class="flex items-center gap-1 justify-center w-full" role="navigation" aria-label="Main menu">
         <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="food" data-i18n="nav.food">FOOD</button>
         <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="drinks" data-i18n="nav.drinks">DRINKS</button>
-        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
+        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium whitespace-nowrap text-center text-transparent bg-clip-text bg-gradient-to-r from-accent via-red-500 to-orange-500" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
         <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="birthday" data-i18n="nav.birthday">BIRTHDAY OFFER</button>
       </nav>
     </div>
@@ -45,13 +45,29 @@
     <!-- Dark Overlay -->
     <div class="absolute inset-0 z-10 bg-gradient-to-b from-primary/70 via-primary/80 to-primary/95"></div>
     
-    <!-- Vertical Navigation Buttons -->
+<!-- Vertical Navigation Buttons -->
     <div class="relative z-20 px-6 py-12 w-full max-w-md">
       <nav class="space-y-3" role="navigation" aria-label="Main menu">
-        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 active:bg-white/20" data-nav="food" data-i18n="nav.food">FOOD</button>
-        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 active:bg-white/20" data-nav="drinks" data-i18n="nav.drinks">DRINKS</button>
-        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 active:bg-white/20" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
-        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 active:bg-white/20" data-nav="birthday" data-i18n="nav.birthday">BIRTHDAY OFFER</button>
+        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="food">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Zm0 0v5"/></svg>
+          <span data-i18n="nav.food">FOOD</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Zm0 0v5"/></svg>
+        </button>
+        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="drinks">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;"><path d="M8 22h8"/><path d="M12 11v11"/><path d="m19 3-7 8-7-8Z"/></svg>
+          <span data-i18n="nav.drinks">DRINKS</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;"><path d="M8 22h8"/><path d="M12 11v11"/><path d="m19 3-7 8-7-8Z"/></svg>
+        </button>
+        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold transition-colors rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="promo">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+          <span class="promo-text text-transparent bg-clip-text bg-gradient-to-r from-accent via-red-500 to-orange-500" data-i18n="nav.promo">PROMO SET</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+        </button>
+        <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold text-white hover:text-accent transition-colors rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="birthday">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16h16"/><path d="M12 11V7"/><path d="M8 11V8"/><path d="M16 11V8"/><path d="M12 4v.01"/><path d="M8 5v.01"/><path d="M16 5v.01"/></svg>
+          <span data-i18n="nav.birthday">BIRTHDAY OFFER</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16h16"/><path d="M12 11V7"/><path d="M8 11V8"/><path d="M16 11V8"/><path d="M12 4v.01"/><path d="M8 5v.01"/><path d="M16 5v.01"/></svg>
+        </button>
       </nav>
       
       <!-- Language Switcher in Hero -->
@@ -63,7 +79,7 @@
       
       <!-- Scroll Indicator -->
       <div class="mt-10 flex justify-center">
-        <button class="hero-nav-btn w-auto px-6 py-3 text-center animate-bounce" data-nav="food" aria-label="Scroll to menu">
+        <button class="scroll-indicator w-auto px-6 py-3 text-center" data-nav="food" aria-label="Scroll to menu">
           <svg class="w-6 h-6 mx-auto text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
           </svg>
