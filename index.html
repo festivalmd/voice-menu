@@ -25,23 +25,16 @@
   <link rel="manifest" href="/manifest.json">
 </head>
 <body class="bg-primary text-white min-h-screen font-sans antialiased">
-  <!-- Sticky Header / Navigation -->
-  <header id="main-header" class="sticky top-0 z-40 bg-primary/95 backdrop-blur-sm border-b border-white/10" role="banner">
-    <div class="flex items-center justify-between px-4 py-3 gap-2">
-      <!-- Navigation Buttons -->
-      <nav class="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-1 flex-1 justify-center" role="navigation" aria-label="Main menu">
-        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="food" data-i18n="nav.food">FOOD</button>
-        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="drinks" data-i18n="nav.drinks">DRINKS</button>
-        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
-        <button class="nav-btn px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap" data-nav="birthday" data-i18n="nav.birthday">BIRTHDAY OFFER</button>
+  <!-- Sticky Header / Navigation - Hidden initially, shows on scroll -->
+  <header id="main-header" class="fixed top-0 left-0 right-0 z-40 bg-primary/95 backdrop-blur-sm border-b border-white/10 transform -translate-y-full transition-transform duration-300 ease-out" role="banner" aria-hidden="true">
+    <div class="flex items-center justify-center px-4 py-2.5">
+      <!-- Navigation Buttons - No horizontal scroll, all fit -->
+      <nav class="flex items-center gap-1 justify-center w-full" role="navigation" aria-label="Main menu">
+        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="food" data-i18n="nav.food">FOOD</button>
+        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="drinks" data-i18n="nav.drinks">DRINKS</button>
+        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="promo" data-i18n="nav.promo">PROMO SET</button>
+        <button class="nav-btn flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="birthday" data-i18n="nav.birthday">BIRTHDAY OFFER</button>
       </nav>
-
-      <!-- Language Switcher -->
-      <div class="flex items-center gap-1 flex-shrink-0" role="group" aria-label="Language selection">
-        <button class="lang-btn px-3 py-1.5 text-xs font-medium rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors whitespace-nowrap" data-lang="ro" aria-label="Romanian">RO</button>
-        <button class="lang-btn px-3 py-1.5 text-xs font-medium rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors whitespace-nowrap" data-lang="ru" aria-label="Russian">RU</button>
-        <button class="lang-btn px-3 py-1.5 text-xs font-medium rounded-full bg-white/10 text-white/80 hover:bg-white/20 transition-colors whitespace-nowrap" data-lang="en" aria-label="English">EN</button>
-      </div>
     </div>
   </header>
 
@@ -69,10 +62,12 @@
       </div>
       
       <!-- Scroll Indicator -->
-      <div class="mt-10 text-center animate-bounce" aria-hidden="true">
-        <svg class="w-6 h-6 mx-auto text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-        </svg>
+      <div class="mt-10 flex justify-center">
+        <button class="hero-nav-btn w-auto px-6 py-3 text-center animate-bounce" data-nav="food" aria-label="Scroll to menu">
+          <svg class="w-6 h-6 mx-auto text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+          </svg>
+        </button>
       </div>
     </div>
   </section>

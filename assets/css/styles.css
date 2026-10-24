@@ -14,10 +14,20 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Scroll margin for sections to account for sticky header */
+/* Scroll margin for sections to account for header when visible */
 #food-section,
 #drinks-section {
-  scroll-margin-top: 80px; /* Adjust based on header height */
+  scroll-margin-top: 60px; /* Header height when visible */
+}
+
+/* Header visibility states */
+#main-header {
+  transform: translateY(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#main-header.header-visible {
+  transform: translateY(0);
 }
 
 /* Focus styles for accessibility */
@@ -60,7 +70,8 @@ body.modal-open {
 
 /* Hide header when modal is open */
 body.modal-open #main-header {
-  display: none;
+  transform: translateY(-100%) !important;
+  pointer-events: none;
 }
 
 /* Touch-friendly tap targets */
@@ -75,7 +86,8 @@ button, a {
 }
 
 /* Language button active state */
-.lang-btn.active {
+.lang-btn.active,
+.hero-lang-btn.active {
   background-color: #e94560;
   color: white;
 }
@@ -121,6 +133,10 @@ button, a {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  #main-header {
+    transition: none;
   }
 }
 

@@ -6,11 +6,14 @@
 class BarMenuApp {
   constructor() {
     this.header = document.getElementById('main-header');
+    this.heroSection = document.getElementById('hero-landing');
     this.mainContent = document.getElementById('main-content');
     this.promoModal = document.getElementById('promo-modal');
     this.birthdayModal = document.getElementById('birthday-modal');
     this.scrollPosition = 0;
     this.activeModal = null;
+    this.headerVisible = false;
+    this.ticking = false;
     
     this.init();
   }
@@ -18,6 +21,44 @@ class BarMenuApp {
   init() {
     this.bindEvents();
     this.handleHashNavigation();
+    this.setupScrollListener();
+  }
+
+  setupScrollListener() {
+    // Listen for scroll to show/hide header
+    window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+  }
+
+  onScroll() {
+    if (this.ticking) return;
+    this.ticking = true;
+    
+    requestAnimationFrame(() => {
+      this.updateHeaderVisibility();
+      this.ticking = false;
+    });
+  }
+
+  updateHeaderVisibility() {
+    if (!this.heroSection || !this.header) return;
+    
+    const heroRect = this.heroSection.getBoundingClientRect();
+    const heroBottom = heroRect.bottom;
+    const viewportHeight = window.innerHeight;
+    
+    // Show header when hero section is mostly out of view (less than 50px visible)
+    const shouldShow = heroBottom < 50;
+    
+    if (shouldShow !== this.headerVisible) {
+      this.headerVisible = shouldShow;
+      if (shouldShow) {
+        this.header.classList.add('header-visible');
+        this.header.setAttribute('aria-hidden', 'false');
+      } else {
+        this.header.classList.remove('header-visible');
+        this.header.setAttribute('aria-hidden', 'true');
+      }
+    }
   }
 
   bindEvents() {
@@ -92,7 +133,7 @@ class BarMenuApp {
     const section = document.getElementById(sectionId);
     if (!section) return;
 
-    const headerHeight = this.header.offsetHeight;
+    const headerHeight = this.headerVisible ? this.header.offsetHeight : 0;
     const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
     const offsetTop = sectionTop - headerHeight;
 
