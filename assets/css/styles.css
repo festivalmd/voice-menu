@@ -17,7 +17,13 @@ html {
 /* Scroll margin for sections to account for header when visible */
 #food-section,
 #drinks-section {
-  scroll-margin-top: 60px; /* Header height when visible */
+  scroll-margin-top: 80px; /* Header height when visible + extra spacing */
+}
+
+/* Add padding to sections when header is visible to prevent content hiding behind header */
+body.header-visible #food-section,
+body.header-visible #drinks-section {
+  padding-top: 80px;
 }
 
 /* Header visibility states */

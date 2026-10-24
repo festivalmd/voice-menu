@@ -54,9 +54,11 @@ class BarMenuApp {
       if (shouldShow) {
         this.header.classList.add('header-visible');
         this.header.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('header-visible');
       } else {
         this.header.classList.remove('header-visible');
         this.header.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('header-visible');
       }
     }
   }
