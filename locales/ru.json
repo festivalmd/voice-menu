@@ -1,23 +1,23 @@
 {
   "nav": {
-    "food": "FOOD",
-    "drinks": "DRINKS",
-    "promo": "PROMO SET",
-    "birthday": "BIRTHDAY OFFER"
+    "food": "ЕДА",
+    "drinks": "НАПИТКИ",
+    "promo": "ПРОМО СЕТ",
+    "birthday": "ДЕНЬ РОЖДЕНИЯ"
   },
   "common": {
-    "back": "BACK"
+    "back": "НАЗАД"
   },
   "sections": {
-    "food": "FOOD MENU",
-    "drinks": "DRINKS MENU"
+    "food": "МЕНЮ ЕДЫ",
+    "drinks": "МЕНЮ НАПИТКОВ"
   },
   "promo": {
-    "title": "PROMO SET",
-    "content": "Promo content will be added here after PDF upload."
+    "title": "ПРОМО СЕТ",
+    "content": "Содержимое промо сета будет добавлено после загрузки PDF."
   },
   "birthday": {
-    "title": "BIRTHDAY OFFER",
-    "content": "Birthday offer content will be added here after PDF upload."
+    "title": "ПРЕДЛОЖЕНИЕ К ДНЮ РОЖДЕНИЯ",
+    "content": "Содержимое предложения к дню рождения будет добавлено после загрузки PDF."
   }
 }

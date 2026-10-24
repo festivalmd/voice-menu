@@ -5,7 +5,7 @@
 
 class BarMenuApp {
   constructor() {
-    this.header = document.querySelector('header');
+    this.header = document.getElementById('main-header');
     this.mainContent = document.getElementById('main-content');
     this.promoModal = document.getElementById('promo-modal');
     this.birthdayModal = document.getElementById('birthday-modal');

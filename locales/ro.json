@@ -1,23 +1,23 @@
 {
   "nav": {
-    "food": "FOOD",
-    "drinks": "DRINKS",
+    "food": "MÂNCARE",
+    "drinks": "BĂUTURI",
     "promo": "PROMO SET",
-    "birthday": "BIRTHDAY OFFER"
+    "birthday": "ZIUA DE NAȘTERE"
   },
   "common": {
-    "back": "BACK"
+    "back": "ÎNAPOI"
   },
   "sections": {
-    "food": "FOOD MENU",
-    "drinks": "DRINKS MENU"
+    "food": "MENIU MÂNCARE",
+    "drinks": "MENIU BĂUTURI"
   },
   "promo": {
     "title": "PROMO SET",
-    "content": "Promo content will be added here after PDF upload."
+    "content": "Conținutul promo set-ului va fi adăugat după încărcarea PDF-ului."
   },
   "birthday": {
-    "title": "BIRTHDAY OFFER",
-    "content": "Birthday offer content will be added here after PDF upload."
+    "title": "OFERTĂ ZIUA DE NAȘTERE",
+    "content": "Conținutul ofertei de ziua de naștere va fi adăugat după încărcarea PDF-ului."
   }
 }

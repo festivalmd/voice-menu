@@ -94,6 +94,14 @@ class I18n {
       } else {
         element.textContent = translation;
       }
+
+      // Special handling for back buttons: update parent button's aria-label
+      if (key === 'common.back' && element.tagName === 'SPAN') {
+        const parentBtn = element.closest('button');
+        if (parentBtn) {
+          parentBtn.setAttribute('aria-label', translation);
+        }
+      }
     });
 
     // Update document title if it has data-i18n
@@ -111,7 +119,7 @@ class I18n {
    * @param {string} activeLang - Active language code
    */
   updateLanguageButtons(activeLang) {
-    document.querySelectorAll('.lang-btn').forEach(btn => {
+    document.querySelectorAll('.lang-btn, .hero-lang-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === activeLang) {
         btn.classList.add('active');
@@ -128,8 +136,8 @@ class I18n {
    * @returns {Promise<void>}
    */
   async init() {
-    // Get saved language or default to 'ru' (first language in PRD)
-    const savedLang = localStorage.getItem('preferred-language') || 'ru';
+    // Get saved language or default to 'ro' (Romanian first)
+    const savedLang = localStorage.getItem('preferred-language') || 'ro';
     await this.setLanguage(savedLang);
   }
 }
