@@ -672,7 +672,7 @@ setPriceEditorMode(mode) {
       placeBtn.className = 'mode-btn px-3 py-1.5 text-sm font-medium rounded-md bg-accent text-white';
       priceBtn.className = 'mode-btn px-3 py-1.5 text-sm font-medium rounded-md bg-white/10 text-white/70 hover:bg-white/20';
       saveBtn.textContent = 'Save Zones';
-      hint.textContent = 'PRICE PLACE: Drag on image to create rectangular price zones';
+      hint.textContent = 'PRICE PLACE: Drag on image to create zones. Click a zone, then nudge it with the arrow keys.';
       // PLACE mode = only draw/move rectangles: hide ALL style settings
       // (font size / text color / text shadow). Inline display is used because the
       // sidebar has a `lg:block` utility that would otherwise override `hidden`.
@@ -682,12 +682,69 @@ setPriceEditorMode(mode) {
       placeBtn.className = 'mode-btn px-3 py-1.5 text-sm font-medium rounded-md bg-white/10 text-white/70 hover:bg-white/20';
       priceBtn.className = 'mode-btn px-3 py-1.5 text-sm font-medium rounded-md bg-accent text-white';
       saveBtn.textContent = 'Save Prices';
-      hint.textContent = 'PRICE: Click zone to edit text';
+      hint.textContent = 'PRICE: Click zone to edit text. Selected zone can be nudged with arrow keys (Shift 1%, Alt resize).';
       // PRICE mode = reveal style settings. Clear the inline override so the
       // sidebar falls back to its classes (`hidden lg:block`) and the toolbar shows.
       if (sidebar) { sidebar.classList.remove('hidden'); sidebar.style.display = ''; }
       if (toolbar) { toolbar.classList.remove('hidden'); toolbar.style.display = ''; }
     }
+  }
+
+  /**
+   * Bind a document-level keydown listener that nudges the selected price zone
+   * with the arrow keys:
+   *   - Arrow            -> move by 0.1% (fine, ~1px)
+   *   - Shift + Arrow    -> move by 1%   (fast)
+   *   - Alt + Arrow      -> resize width/height by 0.1%
+   * The handler is a no-op while the user is typing in a form field (input /
+   * textarea / select / contenteditable) so it never interferes with editing a
+   * price, and it calls preventDefault() only when it actually moves a zone, so
+   * the page does not scroll while nudging.
+   */
+  bindPriceZoneKeyboard() {
+    // Avoid stacking duplicate listeners across re-binds.
+    if (this._zoneKeyHandler) {
+      document.removeEventListener('keydown', this._zoneKeyHandler);
+      this._zoneKeyHandler = null;
+    }
+
+    this._zoneKeyHandler = (e) => {
+      // Only while the price editor is open.
+      const modal = document.getElementById('price-editor-modal');
+      if (!modal || modal.classList.contains('hidden')) return;
+      // Never hijack keys while the caret is in a form field.
+      const t = e.target;
+      if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable)) return;
+      // Nothing selected -> nothing to nudge.
+      if (!this.selectedZoneId) return;
+
+      const ARROWS = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+      if (!ARROWS.includes(e.key)) return;
+
+      const step = e.shiftKey ? 1 : 0.1; // Shift = fast (1%), plain = fine (0.1%)
+      let dx = 0, dy = 0, dw = 0, dh = 0;
+
+      if (e.altKey) {
+        // Alt + Arrow resizes the zone (right/down grow, left/up shrink).
+        if (e.key === 'ArrowRight') dw = step;
+        else if (e.key === 'ArrowLeft') dw = -step;
+        else if (e.key === 'ArrowDown') dh = step;
+        else if (e.key === 'ArrowUp') dh = -step;
+      } else {
+        if (e.key === 'ArrowRight') dx = step;
+        else if (e.key === 'ArrowLeft') dx = -step;
+        else if (e.key === 'ArrowDown') dy = step;
+        else if (e.key === 'ArrowUp') dy = -step;
+      }
+
+      // Stop the page from scrolling once we know we will consume the key.
+      e.preventDefault();
+      if (this.nudgeSelectedZone(dx, dy, dw, dh)) {
+        this.selectZone(this.selectedZoneId); // keep the highlight in sync
+      }
+    };
+
+    document.addEventListener('keydown', this._zoneKeyHandler);
   }
 
   bindPriceEditorEvents() {
@@ -701,7 +758,10 @@ setPriceEditorMode(mode) {
       if (e.key === 'Escape') this.closePriceEditor();
     };
     document.addEventListener('keydown', this.escapeHandler);
-    
+
+    // Arrow-key nudging of the selected zone (works in BOTH modes).
+    this.bindPriceZoneKeyboard();
+
     const overlay = document.getElementById('price-editor-overlay');
     if (!overlay) return;
 
@@ -832,6 +892,11 @@ setPriceEditorMode(mode) {
       this.priceEditorCleanup();
       this.priceEditorCleanup = null;
     }
+    // Remove the arrow-key nudge listener (if bound).
+    if (this._zoneKeyHandler) {
+      document.removeEventListener('keydown', this._zoneKeyHandler);
+      this._zoneKeyHandler = null;
+    }
     // Also clean up any price editor specific event listeners
     const overlay = document.getElementById('price-editor-overlay');
     if (overlay) {
@@ -892,6 +957,46 @@ setPriceEditorMode(mode) {
       this.renderZoneOverlay();
       this.renderPriceZoneList();
     }
+  }
+
+  /**
+   * Nudge / resize the currently selected price zone with the keyboard.
+   * dx / dy move the zone (in percent), dw / dh resize it (in percent).
+   * Coordinates are clamped so the zone always stays fully inside the image
+   * (x: 0..100-w, y: 0..100-h) and rounded to 2 decimals to avoid float noise
+   * like 12.30000000001. The overlay + list are re-rendered and the config is
+   * marked dirty so the new position can be persisted with Save.
+   *
+   * @returns {boolean} true if a zone was actually changed.
+   */
+  nudgeSelectedZone(dx = 0, dy = 0, dw = 0, dh = 0) {
+    if (!this.selectedZoneId) return false;
+    const zone = this.priceEditorZones.find(z => z.id === this.selectedZoneId);
+    if (!zone) return false;
+
+    const round2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
+    const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+
+    // Resize first so the movement clamp below accounts for the new size.
+    if (dw || dh) {
+      zone.w_percent = round2(clamp((Number(zone.w_percent) || 0) + dw, 0.1, 100));
+      zone.h_percent = round2(clamp((Number(zone.h_percent) || 0) + dh, 0.1, 100));
+    }
+
+    const w = Number(zone.w_percent) || 0;
+    const h = Number(zone.h_percent) || 0;
+    const x = round2(clamp((Number(zone.x_percent) || 0) + dx, 0, Math.max(0, 100 - w)));
+    const y = round2(clamp((Number(zone.y_percent) || 0) + dy, 0, Math.max(0, 100 - h)));
+
+    if (x === zone.x_percent && y === zone.y_percent && !dw && !dh) return false;
+
+    zone.x_percent = x;
+    zone.y_percent = y;
+
+    this.renderZoneOverlay();
+    this.renderPriceZoneList();
+    this.markDirty();
+    return true;
   }
 
   renderPriceZoneList() {
@@ -1278,6 +1383,10 @@ zone.addEventListener('mousedown', onMouseDown);
     if (this.escapeHandler) {
       document.removeEventListener('keydown', this.escapeHandler);
       this.escapeHandler = null;
+    }
+    if (this._zoneKeyHandler) {
+      document.removeEventListener('keydown', this._zoneKeyHandler);
+      this._zoneKeyHandler = null;
     }
     const modal = document.getElementById('price-editor-modal');
     if (modal) {
