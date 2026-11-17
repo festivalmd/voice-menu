@@ -80,48 +80,76 @@
     </div>
   </main>
 
-  <!-- PROMO SET Modal -->
-  <div id="promo-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="promo-title">
-    <div class="min-h-screen">
-      <!-- Sticky Back Button -->
-      <div class="sticky top-0 z-10 bg-primary/95 backdrop-blur-sm border-b border-white/10 px-4 py-3">
-        <button id="promo-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
-          <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-          <span class="font-medium" data-i18n="common.back">BACK</span>
-        </button>
-      </div>
+  <!-- PROMO SET Modal - Full screen (100vw x 100dvh) with horizontal swipe slider -->
+  <div id="promo-modal" class="modal-fullscreen fixed inset-0 z-50 w-screen h-[100dvh] m-0 max-w-none rounded-none flex flex-col overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="promo-title">
+    <!-- Modal Header - always visible, pinned to the top -->
+    <div class="modal-header shrink-0 sticky top-0 z-30 bg-primary/95 border-b border-white/10 px-4 py-3">
+      <button id="promo-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span class="font-medium" data-i18n="common.back">BACK</span>
+      </button>
+    </div>
 
-      <!-- Modal Content - Image Based -->
-      <div class="px-4 py-6">
-        <h2 id="promo-title" class="sr-only" data-i18n="promo.title">PROMO SET</h2>
-        <div id="promo-content" class="space-y-4">
-          <!-- Dynamically rendered from config -->
-        </div>
+    <!-- Modal Content - horizontal swipe slider (filled from config) -->
+    <div class="modal-body flex-1 relative min-h-0 flex items-center justify-center">
+      <h2 id="promo-title" class="sr-only" data-i18n="promo.title">PROMO SET</h2>
+      <!-- Prev / Next arrows (shown only when more than one image) -->
+      <button type="button" class="modal-nav-btn modal-nav-prev" data-slider-arrows="promo" aria-label="Previous slide">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button type="button" class="modal-nav-btn modal-nav-next" data-slider-arrows="promo" aria-label="Next slide">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <div id="promo-content" class="modal-slider">
+        <!-- Dynamically rendered from config -->
+      </div>
+      <!-- Bottom indicators: dots + counter -->
+      <div class="modal-indicators" data-slider-dots="promo">
+        <div class="modal-dots" data-slider-dots-list="promo"></div>
+        <span class="modal-counter" data-slider-counter="promo">1 / 1</span>
       </div>
     </div>
   </div>
 
-  <!-- BIRTHDAY OFFER Modal -->
-  <div id="birthday-modal" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="birthday-title">
-    <div class="min-h-screen">
-      <!-- Sticky Back Button -->
-      <div class="sticky top-0 z-10 bg-primary/95 backdrop-blur-sm border-b border-white/10 px-4 py-3">
-        <button id="birthday-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
-          <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-          </svg>
-          <span class="font-medium" data-i18n="common.back">BACK</span>
-        </button>
-      </div>
+  <!-- BIRTHDAY OFFER Modal - Full screen (100vw x 100dvh) with horizontal swipe slider -->
+  <div id="birthday-modal" class="modal-fullscreen fixed inset-0 z-50 w-screen h-[100dvh] m-0 max-w-none rounded-none flex flex-col overflow-hidden hidden" role="dialog" aria-modal="true" aria-labelledby="birthday-title">
+    <!-- Modal Header - always visible, pinned to the top -->
+    <div class="modal-header shrink-0 sticky top-0 z-30 bg-primary/95 border-b border-white/10 px-4 py-3">
+      <button id="birthday-back" class="back-btn w-full flex items-center justify-center gap-2 px-4 py-3 text-left bg-white/5 hover:bg-white/10 rounded-lg transition-colors" aria-label="Back to menu">
+        <svg class="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+        <span class="font-medium" data-i18n="common.back">BACK</span>
+      </button>
+    </div>
 
-      <!-- Modal Content - Image Based -->
-      <div class="px-4 py-6">
-        <h2 id="birthday-title" class="sr-only" data-i18n="birthday.title">BIRTHDAY OFFER</h2>
-        <div id="birthday-content" class="space-y-4">
-          <!-- Dynamically rendered from config -->
-        </div>
+    <!-- Modal Content - horizontal swipe slider (filled from config) -->
+    <div class="modal-body flex-1 relative min-h-0 flex items-center justify-center">
+      <h2 id="birthday-title" class="sr-only" data-i18n="birthday.title">BIRTHDAY OFFER</h2>
+      <!-- Prev / Next arrows (shown only when more than one image) -->
+      <button type="button" class="modal-nav-btn modal-nav-prev" data-slider-arrows="birthday" aria-label="Previous slide">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </button>
+      <button type="button" class="modal-nav-btn modal-nav-next" data-slider-arrows="birthday" aria-label="Next slide">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+        </svg>
+      </button>
+      <div id="birthday-content" class="modal-slider">
+        <!-- Dynamically rendered from config -->
+      </div>
+      <!-- Bottom indicators: dots + counter -->
+      <div class="modal-indicators" data-slider-dots="birthday">
+        <div class="modal-dots" data-slider-dots-list="birthday"></div>
+        <span class="modal-counter" data-slider-counter="birthday">1 / 1</span>
       </div>
     </div>
   </div>

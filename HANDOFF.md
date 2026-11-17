@@ -48,6 +48,17 @@
 3. A zone is a RECTANGLE (x_percent/y_percent = top-left, w/h = size) — the tag OCCUPIES that rectangle 1:1 (inline `left/top/width/height` in `%`, `box-sizing:border-box`, `overflow:hidden`, flex-centered text, `line-height:1`), with NO padding/border/radius/shadow. Background = `zone.backgroundColor` or the admin mask background `rgba(0,0,0,0.2)`. Legacy `prices[]` (no w/h) → centered point label
 4. Font size is fluid via Container Queries: the stored px size is converted by `fontSizeToCqw(px) = px / 5.6` (baseline 14px == 2.5cqw @560px) and rendered as `clamp(8px, Xcqw, 96px)`. The admin editor uses the identical formula/container, so admin preview == client 1:1
 
+### Full-screen Modals + Horizontal Swipe Slider (`promo-modal`, `birthday-modal`)
+- **Full screen**: `.modal-fullscreen` = `fixed inset-0 w-screen h-[100dvh]` with `m-0 max-w-none rounded-none flex flex-col overflow-hidden`; the CSS block mirrors it with `100dvw/100dvh` + `!important` overrides and forces `display:none` while `.hidden` (Tailwind `flex` cannot win).
+- **Pinned header**: `.modal-header` is `shrink-0 sticky top-0 z-30` and adds `env(safe-area-inset-top/left/right)` padding → it never scrolls away and is never covered by slides (slides live below it in `.modal-body`).
+- **Slider built from config** (`renderSlider()` in `app.js`): N `.modal-slide` elements == the actual number of images in the `promo-modal` / `birthday-modal` section. Dots are generated the same way. 1 image → arrows + indicators hidden (`is-single`); 2+ → N slides + N dots.
+- **Slider mechanics**: `#promo-content` / `#birthday-content` are `.modal-slider` = `display:flex; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth` with the scrollbar hidden. Each `.modal-slide` is `flex:0 0 100%` + `scroll-snap-align:start`; the picture uses `object-fit:contain` so it is as large as possible.
+- **Arrows**: `.modal-nav-btn` (52×52, ≥44px tap target) = dark translucent circle `rgba(20,20,35,.72)` + `backdrop-filter:blur(4px)`, white stroke, light border, soft shadow. Hidden on the first slide (prev) / last slide (next) and when a single image exists (`hidden` / `is-disabled`). The next arrow rocks `translateX(3px)` while more slides are available.
+- **Indicators**: `.modal-indicators` (bottom plashka) holds dots + `1 / N` counter; they follow the native scroll (`getActiveSlideIndex`) and jump on click (`scrollSliderTo`). Hidden when there is one image.
+- **Open resets to slide 1**: `openModal()` calls `resetSlider(name)` → `scrollLeft = 0` (instant, no smooth animation).
+- **Price zones stay aligned**: `sizeModalSliders()` (in `app.js`, mirrors the admin `sizePriceEditorWrapper()`) sizes each `.modal-image-wrapper` in px to the picture's real display box (aspect preserved), so the `inset:0` overlay == the image area and existing `%`-based zones land exactly where the admin drew them. Re-measured on open, on image `load`/`error`, on `resize` and on `orientationchange`.
+- **config.json / admin.js untouched**: the client only reads the sections; the image markup (`.image-wrapper` + `.price-overlay[data-image-id]`) is unchanged, so admin price editing keeps working 1:1.
+
 ## 3. Working Features (DO NOT BREAK)
 - ✅ Config-driven rendering (nav, sections, modals, prices)
 - ✅ i18n (RO/RU/EN) via `i18n.js` + `data-i18n` attributes

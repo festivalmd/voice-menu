@@ -65,7 +65,12 @@ class BarMenuApp {
     // background even before a separate one is uploaded.
     const heroSection = this.config.sections.find(s => s.id === 'hero-section');
     const heroImg = heroSection?.images?.[0]?.src;
-    const firstMenuImg = this.config.sections.find(s => s.id !== 'hero-section')?.images?.[0]?.src;
+    // Fall back to the first real menu section - never a modal section, so a
+    // promo/birthday picture can't accidentally become the landing background.
+    const firstMenuSection = this.config.sections
+      .find(s => s.id !== 'hero-section' && !BarMenuApp.isModalSection(s) && s.images?.length)
+      || this.config.sections.find(s => s.id !== 'hero-section' && s.images?.length);
+    const firstMenuImg = firstMenuSection?.images?.[0]?.src;
     const src = heroImg || firstMenuImg;
     if (src) heroBg.style.backgroundImage = `url('${src}')`;
   }
@@ -123,11 +128,44 @@ class BarMenuApp {
       : '';
   }
 
+  /**
+   * Section ids that must NEVER be rendered in the main page flow. Promo and
+   * birthday are MODAL sections: their content lives exclusively inside
+   * #promo-modal / #birthday-modal (built by renderSlider). Rendering them here
+   * would (a) paint their images under the food/drinks sections and (b) create
+   * DUPLICATE `id`s (`promo-modal`, `birthday-modal`), so getElementById() would
+   * resolve to the in-page clone instead of the real modal and the slider
+   * arrows / dots / scroll-sync would silently break.
+   */
+  static modalSectionIds() {
+    return ['promo', 'birthday', 'promo-modal', 'birthday-modal'];
+  }
+
+  /** True for modal sections (by id or explicit `type: 'modal'`) */
+  static isModalSection(section) {
+    if (!section) return false;
+    const id = String(section.id || '').toLowerCase();
+    return section.type === 'modal' || BarMenuApp.modalSectionIds().indexOf(id) !== -1;
+  }
+
+  /**
+   * Resolve a real modal element (#promo-modal / #birthday-modal). It must be
+   * the full-screen dialog, never an accidental in-page clone, so the check is
+   * anchored on the `.modal-fullscreen` class.
+   */
+  getModalEl(name) {
+    const byId = document.getElementById(`${name}-modal`);
+    if (byId && byId.classList.contains('modal-fullscreen')) return byId;
+    return document.querySelector(`.modal-fullscreen#${name}-modal`);
+  }
+
   renderSections() {
     const container = document.getElementById('main-menu-container');
     if (!container || !this.config?.sections) return;
 
-    container.innerHTML = this.config.sections.filter(section => section.id !== 'hero-section').map(section => {
+    container.innerHTML = this.config.sections
+      .filter(section => section.id !== 'hero-section' && !BarMenuApp.isModalSection(section))
+      .map(section => {
       return `
         <section id="${section.id}" class="menu-section px-4" aria-labelledby="${section.id}-title">
           <h2 id="${section.id}-title" class="sr-only" data-i18n="${section.titleKey}">${section.id.toUpperCase()}</h2>
@@ -145,32 +183,182 @@ class BarMenuApp {
   }
 
   renderModals() {
-    // Promo modal
-    const promoContent = document.getElementById('promo-content');
-    const promoSection = this.config?.sections?.find(s => s.id === 'promo-modal');
-    if (promoContent && promoSection) {
-      promoContent.innerHTML = promoSection.images.map(img => `
-        <div class="image-wrapper relative">
-          <img src="${img.src}" alt="${img.alt}" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
-          <div class="price-overlay absolute inset-0 pointer-events-none" data-image-id="${img.id}"></div>
-        </div>
-      `).join('');
-    }
-
-    // Birthday modal
-    const birthdayContent = document.getElementById('birthday-content');
-    const birthdaySection = this.config?.sections?.find(s => s.id === 'birthday-modal');
-    if (birthdayContent && birthdaySection) {
-      birthdayContent.innerHTML = birthdaySection.images.map(img => `
-        <div class="image-wrapper relative">
-          <img src="${img.src}" alt="${img.alt}" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
-          <div class="price-overlay absolute inset-0 pointer-events-none" data-image-id="${img.id}"></div>
-        </div>
-      `).join('');
-    }
+    // Build a universal horizontal slider for each modal straight from config:
+    // 1 image -> arrows/dots hidden, 2+ images -> N slides + N dots, generated
+    // dynamically (nothing is hardcoded). Read-only over config.json.
+    this.renderSlider('promo-modal', 'promo-content');
+    this.renderSlider('birthday-modal', 'birthday-content');
 
     // Render price tags for all images
     this.renderAllPriceTags();
+  }
+
+  /**
+   * Build a full-screen horizontal swipe slider inside a modal.
+   * @param {string} sectionId  config section id (e.g. 'promo-modal')
+   * @param {string} contentId  DOM id of the slider container (e.g. 'promo-content')
+   */
+  renderSlider(sectionId, contentId) {
+    const slider = document.getElementById(contentId);
+    if (!slider) return;
+
+    const section = this.config?.sections?.find(s => s.id === sectionId);
+    const images = section?.images || [];
+    const name = sectionId.replace('-modal', ''); // 'promo' | 'birthday'
+
+    // Slides: each occupies 100% of the slider and centers the image (object-contain).
+    slider.innerHTML = images.map(img => `
+      <div class="modal-slide">
+        <div class="image-wrapper modal-image-wrapper">
+          <img src="${img.src}" alt="${img.alt}" class="modal-slide-img" loading="lazy">
+          <div class="price-overlay absolute inset-0 pointer-events-none" data-image-id="${img.id}"></div>
+        </div>
+      </div>
+    `).join('');
+
+    // Dots generated from the ACTUAL image count (1 -> hidden by CSS/JS below).
+    const dotsList = document.querySelector(`[data-slider-dots-list="${name}"]`);
+    if (dotsList) {
+      dotsList.innerHTML = images.map((_, i) => `
+        <button type="button" class="modal-dot${i === 0 ? ' is-active' : ''}" data-slide-to="${i}" data-slider="${name}" aria-label="Slide ${i + 1}"></button>
+      `).join('');
+    }
+
+    // Measure each slide wrapper once its picture is decoded (real display box).
+    slider.querySelectorAll('img.modal-slide-img').forEach(img => {
+      if (img.complete) return;
+      img.addEventListener('load', () => this.sizeModalSliders(), { once: true });
+      img.addEventListener('error', () => this.sizeModalSliders(), { once: true });
+    });
+
+    this.updateSliderUI(name, 0);
+  }
+
+  /** Count of slides currently rendered in a modal slider */
+  getSliderSlideCount(name) {
+    const slider = document.getElementById(`${name}-content`);
+    return slider ? slider.querySelectorAll('.modal-slide').length : 0;
+  }
+
+  /** Sync dots, counter and arrow visibility with the active slide index */
+  updateSliderUI(name, index) {
+    const total = this.getSliderSlideCount(name);
+    const safeIndex = total > 0 ? Math.max(0, Math.min(index, total - 1)) : 0;
+
+    const dotsList = document.querySelector(`[data-slider-dots-list="${name}"]`);
+    if (dotsList) {
+      dotsList.querySelectorAll('.modal-dot').forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === safeIndex);
+      });
+    }
+
+    const counter = document.querySelector(`[data-slider-counter="${name}"]`);
+    if (counter) counter.textContent = `${total > 0 ? safeIndex + 1 : 0} / ${total}`;
+
+    // Resolve the modal by the `.modal-fullscreen` class, not just by id, so an
+    // accidentally duplicated id in the page flow can never break the UI state.
+    const modal = this.getModalEl(name);
+    const arrowsScope = modal || document;
+    arrowsScope.querySelectorAll(`[data-slider-arrows="${name}"]`).forEach(btn => {
+      const isPrev = btn.classList.contains('modal-nav-prev');
+      // Arrows: hidden on the first/last slide and when there is a single slide.
+      btn.classList.toggle('hidden', total <= 1);
+      btn.classList.toggle('is-disabled', total <= 1 || (isPrev ? safeIndex === 0 : safeIndex >= total - 1));
+    });
+    if (modal) {
+      // Bottom plashka (dots + counter) hidden for a single image.
+      modal.classList.toggle('is-single', total <= 1);
+    }
+  }
+
+  /**
+   * Width of one slide in px (== the slider viewport width). Falls back to the
+   * first slide's own width when `clientWidth` is still 0 (e.g. the modal has
+   * just been unhidden and layout has not been flushed yet), so scroll math
+   * never silently becomes a no-op (`0 * index`).
+   */
+  getSliderStep(name) {
+    const slider = document.getElementById(`${name}-content`);
+    if (!slider) return 0;
+    const fromSlider = slider.clientWidth || Math.round(slider.getBoundingClientRect().width) || 0;
+    if (fromSlider > 0) return fromSlider;
+    const slide = slider.querySelector('.modal-slide');
+    return slide ? Math.round(slide.getBoundingClientRect().width) || 0 : 0;
+  }
+
+  /** Index of the slide currently snapped into view */
+  getActiveSlideIndex(name) {
+    const slider = document.getElementById(`${name}-content`);
+    if (!slider) return 0;
+    const w = this.getSliderStep(name) || 1;
+    return Math.round(slider.scrollLeft / w);
+  }
+
+  /** Snap a modal slider to a given slide (used by dots / arrows) */
+  scrollSliderTo(name, index) {
+    const slider = document.getElementById(`${name}-content`);
+    if (!slider) return;
+    const total = this.getSliderSlideCount(name);
+    const target = Math.max(0, Math.min(index, total - 1));
+    const step = this.getSliderStep(name);
+    if (step <= 0) {
+      // Layout not measured yet - nothing sane to scroll to.
+      this.updateSliderUI(name, target);
+      return;
+    }
+    slider.scrollTo({ left: target * step, behavior: 'smooth' });
+    this.updateSliderUI(name, target);
+  }
+
+  /** Reset a modal slider to the first slide (scrollLeft = 0) */
+  resetSlider(name) {
+    const slider = document.getElementById(`${name}-content`);
+    if (!slider) return;
+    // Instant jump on open (no smooth animation while the modal is appearing).
+    const behavior = slider.style.scrollBehavior;
+    slider.style.scrollBehavior = 'auto';
+    slider.scrollLeft = 0;
+    // Restore the CSS smooth behavior on the next frame.
+    requestAnimationFrame(() => { slider.style.scrollBehavior = behavior || ''; });
+    this.updateSliderUI(name, 0);
+  }
+
+  /** Wire arrows, dots and scroll-sync for one modal slider */
+  bindSlider(name) {
+    const slider = document.getElementById(`${name}-content`);
+    const modal = this.getModalEl(name) || document;
+    if (!slider) return;
+
+    // Arrows (prev / next) - large, tap-friendly, sit above the slides.
+    // Bound via `[data-slider-arrows]` (not via the modal element) so a stray
+    // duplicated `id` elsewhere in the page can never leave them unwired.
+    modal.querySelectorAll(`[data-slider-arrows="${name}"]`).forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const step = btn.classList.contains('modal-nav-prev') ? -1 : 1;
+        this.scrollSliderTo(name, this.getActiveSlideIndex(name) + step);
+      });
+    });
+
+    // Dots -> jump to a specific slide.
+    modal.querySelectorAll(`.modal-dot[data-slider="${name}"]`).forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.scrollSliderTo(name, parseInt(dot.getAttribute('data-slide-to'), 10) || 0);
+      });
+    });
+
+    // Keep dots/counter/arrows in sync with the native horizontal scroll.
+    let raf = null;
+    slider.addEventListener('scroll', () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        this.updateSliderUI(name, this.getActiveSlideIndex(name));
+      });
+    }, { passive: true });
   }
 
   renderAllPriceTags() {
@@ -262,6 +450,46 @@ class BarMenuApp {
   setupResizeListener() {
     // Price tags are positioned with CSS percentages, so they automatically
     // stay aligned to the image on resize - no re-rendering required.
+    // Modal slider wrappers, however, are sized in px, so re-measure them.
+    window.addEventListener('resize', () => this.sizeModalSliders(), { passive: true });
+    window.addEventListener('orientationchange', () => setTimeout(() => this.sizeModalSliders(), 150));
+  }
+
+  /**
+   * Size every modal slide wrapper to the picture's real display box (aspect
+   * preserved inside the slide, capped at 100% x 100%). Mirrors the approach
+   * used by the admin price editor (#price-editor-wrapper) so the price overlay
+   * (inset: 0) always lands exactly on the printed image - no coordinate drift.
+   */
+  sizeModalSliders() {
+    document.querySelectorAll('.modal-slide').forEach(slide => {
+      const img = slide.querySelector('img.modal-slide-img');
+      const wrapper = slide.querySelector('.modal-image-wrapper');
+      if (!img || !wrapper) return;
+
+      // Available space inside the slide (clientWidth/Height include padding, so
+      // subtract it to keep the picture inside the padded content box).
+      const cs = window.getComputedStyle(slide);
+      const availW = slide.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0);
+      const availH = slide.clientHeight - parseFloat(cs.paddingTop || 0) - parseFloat(cs.paddingBottom || 0);
+      if (availW <= 0 || availH <= 0) return;
+
+      const iw = img.naturalWidth || 0;
+      const ih = img.naturalHeight || 0;
+      if (iw <= 0 || ih <= 0) {
+        // Image not decoded yet - keep the CSS fallback and retry when loaded.
+        return;
+      }
+
+      const scale = Math.min(availW / iw, availH / ih);
+      const w = Math.round(iw * scale);
+      const h = Math.round(ih * scale);
+
+      wrapper.style.width = `${w}px`;
+      wrapper.style.height = `${h}px`;
+      wrapper.style.maxWidth = '100%';
+      wrapper.style.maxHeight = '100%';
+    });
   }
 
   onScroll() {
@@ -314,6 +542,10 @@ class BarMenuApp {
     // Modal back buttons
     document.getElementById('promo-back')?.addEventListener('click', () => this.closeModal('promo'));
     document.getElementById('birthday-back')?.addEventListener('click', () => this.closeModal('birthday'));
+
+    // Modal sliders: arrows, dots, scroll-sync (slides built in renderSlider)
+    this.bindSlider('promo');
+    this.bindSlider('birthday');
 
     // Close modal on overlay click (outside content)
     this.promoModal?.addEventListener('click', (e) => {
@@ -386,7 +618,7 @@ class BarMenuApp {
   }
 
   openModal(modalName) {
-    const modal = modalName === 'promo' ? this.promoModal : this.birthdayModal;
+    const modal = this.getModalEl(modalName) || (modalName === 'promo' ? this.promoModal : this.birthdayModal);
     if (!modal) return;
 
     this.scrollPosition = window.pageYOffset;
@@ -396,6 +628,12 @@ class BarMenuApp {
 
     modal.classList.remove('hidden');
     modal.classList.add('modal-enter');
+
+    // Always start from the first slide (scrollLeft = 0) when opening.
+    this.resetSlider(modalName);
+
+    // The wrapper is only measurable once the modal is visible/laid out.
+    requestAnimationFrame(() => this.sizeModalSliders());
     
     const backBtn = modal.querySelector('.back-btn');
     if (backBtn) {
@@ -409,7 +647,7 @@ class BarMenuApp {
   }
 
   closeModal(modalName) {
-    const modal = modalName === 'promo' ? this.promoModal : this.birthdayModal;
+    const modal = this.getModalEl(modalName) || (modalName === 'promo' ? this.promoModal : this.birthdayModal);
     if (!modal) return;
 
     modal.classList.add('hidden');

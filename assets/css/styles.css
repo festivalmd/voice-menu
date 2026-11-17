@@ -626,13 +626,34 @@ html, body {
 /* The image must fill the wrapper EXACTLY - no gaps / no letterboxing.
    Declared explicitly here (not only via Tailwind utilities) so the wrapper
    always hugs the image and the overlay (inset:0) covers the image precisely,
-   even if the Tailwind CDN fails to load. */
+   even if the Tailwind CDN fails to load.
+   Exception: inside the modal slider the image is absolutely positioned and
+   scaled with object-fit: contain, so the wrapper matches the image area too. */
 .image-wrapper > img {
   display: block;
   width: 100%;
   max-width: 100%;
   height: auto;
   margin: 0;
+}
+
+.image-wrapper > img.modal-slide-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 0;
+  box-shadow: none;
+  /* The picture must stay maximally sharp above the modal's dark scrim:
+     fully opaque, no filter/blur/opacity, and no backdrop-filter of its own
+     (which would create a nested backdrop root and soften the rendering). */
+  opacity: 1;
+  filter: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
 }
 
 /* Price overlay container */
@@ -652,7 +673,7 @@ html, body {
   margin: 0;
   padding: 0;
   border: none !important;
-  border-radius: 6px;
+  border-radius: 0;
   box-shadow: none !important;
   overflow: hidden;
   /* No plate: only the price text is drawn over the image. */
@@ -997,13 +1018,14 @@ button:disabled {
   }
 }
 
-/* Ensure modals work on mobile */
+/* Ensure modals work on mobile (admin/dialog modals only - NOT the full-screen
+   promo/birthday modals, whose children must keep their own flex sizing). */
 @media (max-width: 768px) {
-  .fixed.inset-0 {
+  .fixed.inset-0:not(.modal-fullscreen) {
     padding: 0.5rem !important;
   }
   
-  .fixed.inset-0 > div {
+  .fixed.inset-0:not(.modal-fullscreen) > div {
     max-width: 100% !important;
     margin: 0 !important;
     border-radius: 0 !important;
@@ -1310,10 +1332,10 @@ button:disabled {
 
 /* Ensure price tags display properly on mobile */
 @media (max-width: 768px) {
-  /* Keep the tag an exact rectangle of the zone: no padding; radius restored. */
+  /* Keep the tag an exact rectangle of the zone: no padding, no radius. */
   .price-tag {
     padding: 0;
-    border-radius: 6px;
+    border-radius: 0;
   }
   
   .price-overlay {
@@ -1321,13 +1343,14 @@ button:disabled {
   }
 }
 
-/* Fix for modal overlay on mobile */
+/* Fix for modal overlay on mobile (price editor etc. - NOT the full-screen
+   promo/birthday modals, whose own children must keep flex sizing). */
 @media (max-width: 768px) {
   .fixed.inset-0.bg-black\/90 {
     padding: 0.5rem !important;
   }
   
-  .fixed.inset-0 > div {
+  .fixed.inset-0:not(.modal-fullscreen) > div {
     max-width: 100% !important;
     margin: 0 !important;
     border-radius: 0 !important;
@@ -1352,5 +1375,330 @@ button:disabled {
   
   .price-editor-image {
     touch-action: manipulation;
+  }
+}
+
+/* ==========================================================================
+   FULL-SCREEN MODALS (PROMO SET / BIRTHDAY OFFER) + HORIZONTAL SWIPE SLIDER
+   100vw x 100dvh, pinned header, arrows, dots and counter. Slides are built
+   dynamically from config.json (1 image -> navigation hidden, 2+ -> N slides).
+   ========================================================================== */
+
+/* Full-screen container: fixed to the viewport, no margins/rounding, no scroll
+   on the container itself (each slide owns the overflow). */
+.modal-fullscreen {
+  width: 100vw;
+  width: 100dvw;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 !important;
+  max-width: none !important;
+  border-radius: 0 !important;
+  padding: 0;
+  overflow: hidden;
+  /* Light frosted-glass scrim over the main menu: the page behind the modal
+     softly shows through (80% dim) without competing with the slide images,
+     which are painted ON TOP of this element and therefore stay sharp. */
+  background: rgba(12, 12, 22, 0.80) !important;
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
+/* Closed state wins over the Tailwind `flex` utility regardless of CDN order. */
+.modal-fullscreen.hidden {
+  display: none !important;
+}
+
+/* Pinned header: never scrolled away, never covered by slides. */
+.modal-fullscreen .modal-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  flex-shrink: 0;
+  padding-top: max(12px, env(safe-area-inset-top));
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  background-color: rgba(26, 26, 46, 0.95);
+  /* No nested backdrop-filter here: the dark scrim + blur belong to
+     `.modal-fullscreen`. A filter on this child would create its own backdrop
+     root (visibly different blur band at the top). */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Body = all the remaining height under the header (declared here too, so the
+   slider keeps a definite height even if the Tailwind CDN fails to load).
+   It must NOT paint a background of its own and must NOT apply its own
+   backdrop-filter: a descendant filter would create a new "backdrop root" and
+   cancel the dark scrim / blur coming from `.modal-fullscreen`. */
+.modal-fullscreen .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Slider viewport: native horizontal scroll + scroll-snap, scrollbar hidden.
+   It fills the whole modal body (both axes) so a slide == one screen.
+   Transparent, no own backdrop-filter: the dark scrim + blur come from
+   `.modal-fullscreen` and must show through around the slide image. */
+.modal-slider {
+  display: flex;
+  flex-direction: row;
+  flex: 1 1 auto;
+  align-self: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+.modal-slider::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* Explicit rules for the two slider viewports (BY ID, so nothing else - e.g. a
+   Tailwind utility like `justify-center` / `overflow-hidden` or a stray class -
+   can turn the horizontal scroller into a non-scrollable, always-at-0 box).
+   The viewport must be exactly one screen wide and lay the slides out in a
+   single non-wrapping row that starts at the very left. */
+#promo-content,
+#birthday-content {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  scroll-behavior: smooth;
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+/* One slide = exactly one screen of the slider; the image fills it as large as
+   possible while preserving its aspect ratio (object-fit: contain).
+   The slide itself is fully transparent (the modal scrim shows through) and the
+   picture on top is NEVER blurred/faded -> the slide stays crisp. */
+.modal-slide,
+.modal-slider > .modal-slide {
+  position: relative;
+  flex: 0 0 100%;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
+  height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-sizing: border-box;
+  /* Promoted to its own compositor layer for a buttery-smooth swipe/scroll. */
+  transform: translateZ(0);
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* The wrapper is sized in px by JS (sizeModalSliders) to match the picture's
+   real display box (aspect preserved, fitting 100% x 100% of the slide). This
+   keeps the price overlay (inset: 0) pixel-aligned with the printed image.
+   Fallback (until JS runs): fill the slide, image uses object-fit: contain. */
+.modal-image-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+  container-type: inline-size;
+  background: transparent !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  filter: none;
+}
+
+/* Reserve some room for the arrows so the picture never hides behind them. */
+@media (min-width: 640px) {
+  .modal-slide {
+    padding: 12px 64px;
+  }
+}
+
+/* Arrows: large (>= 44x44), contrast dark circle over light menu images. */
+.modal-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 9999px;
+  background: rgba(20, 20, 35, 0.72);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 0.2s ease, opacity 0.25s ease, transform 0.2s ease;
+}
+.modal-nav-btn svg {
+  width: 28px;
+  height: 28px;
+  stroke: #ffffff;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
+}
+.modal-nav-btn:hover {
+  background: rgba(20, 20, 35, 0.9);
+}
+.modal-nav-btn:active {
+  background: rgba(20, 20, 35, 0.95);
+}
+.modal-nav-prev {
+  left: max(8px, env(safe-area-inset-left));
+}
+.modal-nav-next {
+  right: max(8px, env(safe-area-inset-right));
+}
+
+/* Hidden on the first / last slide (and when there is only one image). */
+.modal-nav-btn.hidden {
+  display: none !important;
+}
+.modal-nav-btn.is-disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Gentle rocking hint on the "next" arrow while more slides are available. */
+@keyframes modalArrowNudge {
+  0%, 100% { transform: translateY(-50%) translateX(0); }
+  50%      { transform: translateY(-50%) translateX(3px); }
+}
+.modal-fullscreen:not(.is-single) .modal-nav-next:not(.is-disabled) {
+  animation: modalArrowNudge 1.6s ease-in-out infinite;
+}
+.modal-nav-next:not(.is-disabled):hover,
+.modal-nav-next:not(.is-disabled):active {
+  animation: none;
+}
+
+/* Bottom plashka with the dots and the "1 / N" counter.
+   Kept deliberately compact and quiet (story-style): a thin glass capsule that
+   never competes with the prices printed on the slide. */
+.modal-indicators {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: max(12px, env(safe-area-inset-bottom));
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  background: rgba(15, 15, 25, 0.65);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+}
+.modal-fullscreen.is-single .modal-indicators {
+  display: none;
+}
+
+.modal-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Mini story-style indicator. The global touch-target rule
+   (`@media (pointer: coarse) { button { min-width/min-height: 44px !important } }`)
+   inflated every dot into a 44px circle, so the visual size below is forced with
+   !important. The tap area stays comfortable because the dots sit inside the
+   `.modal-indicators` plashka and the slider itself remains swipeable. */
+.modal-dot {
+  width: 6px;
+  height: 6px;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 0;
+  border: none;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  box-shadow: none;
+  transition: all 0.25s ease;
+}
+.modal-dot:hover {
+  background: rgba(255, 255, 255, 0.6);
+}
+/* Active dot stretches into a neat mini capsule (works for both class names). */
+.modal-dot.is-active,
+.modal-dot.active {
+  width: 18px;
+  background: #ffffff;
+}
+
+.modal-counter {
+  font-size: 11px;
+  line-height: 1;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  margin-left: 4px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* Respect reduced motion: no arrow rocking. */
+@media (prefers-reduced-motion: reduce) {
+  .modal-fullscreen:not(.is-single) .modal-nav-next {
+    animation: none;
+  }
+  .modal-slider {
+    scroll-behavior: auto;
   }
 }
