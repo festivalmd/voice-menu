@@ -167,3 +167,4 @@ Then add `font-inter` to body class.
 2. Incorrect `data-i18n` keys in HTML
 3. CORS when testing locally (use a local server, not `file://`)
 4. Images not found - check filenames match exactly (case-sensitive on Linux/Vercel)
+1
