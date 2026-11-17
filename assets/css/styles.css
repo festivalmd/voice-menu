@@ -1102,9 +1102,10 @@ button:disabled {
   background: transparent !important;
 }
 
-/* Zone delete (x) button in the admin overlay: must always be clickable and on
-   top of the zone (drag/resize) so it can be pressed reliably. */
-.btn-delete-zone-on-overlay {
+/* Zone delete (x) / duplicate buttons in the admin overlay: must always be
+   clickable and on top of the zone (drag/resize) so they can be pressed reliably. */
+.btn-delete-zone-on-overlay,
+.btn-duplicate-zone-on-overlay {
   pointer-events: auto !important;
   z-index: 30 !important;
   cursor: pointer;
@@ -1299,7 +1300,8 @@ button:disabled {
     height: 1.5rem !important;
   }
   
-  .btn-delete-zone-on-overlay {
+  .btn-delete-zone-on-overlay,
+  .btn-duplicate-zone-on-overlay {
     width: 2rem !important;
     height: 2rem !important;
     font-size: 0.75rem !important;

@@ -903,6 +903,9 @@ setPriceEditorMode(mode) {
         <div class="flex items-center gap-2 mb-2">
           <span class="text-xs text-white/50">#${index + 1}</span>
           <span class="flex-1 bg-white/5 border border-white/10 rounded px-2 py-1 text-white text-xs font-bold">${zone.text || '—'}</span>
+          <button class="btn-duplicate-zone p-1.5 text-white/50 hover:text-accent hover:bg-white/10 rounded transition-colors" data-zone-id="${zone.id}" title="Duplicate">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-2M5 8h9a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2z"/></svg>
+          </button>
           <button class="btn-delete-zone p-1.5 text-white/50 hover:text-red-400 hover:bg-red-500/20 rounded transition-colors" data-zone-id="${zone.id}" title="Delete">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
           </button>
@@ -916,6 +919,10 @@ setPriceEditorMode(mode) {
 
     document.querySelectorAll('.btn-delete-zone').forEach(btn => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); this.deletePriceZone(btn.dataset.zoneId); });
+    });
+
+    document.querySelectorAll('.btn-duplicate-zone').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this.duplicatePriceZone(btn.dataset.zoneId); });
     });
 
     document.querySelectorAll('.price-zone-item').forEach(item => {
@@ -953,6 +960,11 @@ setPriceEditorMode(mode) {
             ${zone.text || '—'}
           </div>
           ${this.priceEditorMode === 'place' ? `
+          <!-- Duplicate button OUTSIDE mask - top-left corner -->
+          <button class="btn-duplicate-zone-on-overlay absolute -top-3 -left-3 w-6 h-6 bg-accent/90 hover:bg-accent text-white rounded-full flex items-center justify-center shadow-lg transition-opacity opacity-70 hover:opacity-100 focus:opacity-100" 
+                  data-zone-id="${zone.id}" title="Duplicate zone" style="z-index: 30;">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-2M5 8h9a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2z"/></svg>
+          </button>
           <!-- Delete button (X) OUTSIDE mask - top-right corner -->
           <button class="btn-delete-zone-on-overlay absolute -top-3 -right-3 w-6 h-6 bg-red-600/90 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-lg transition-opacity opacity-70 hover:opacity-100 focus:opacity-100" 
                   data-zone-id="${zone.id}" title="Delete zone" style="z-index: 20;">
@@ -981,6 +993,22 @@ setPriceEditorMode(mode) {
         };
         btn.addEventListener('pointerdown', onDelete);
         btn.addEventListener('click', onDelete);
+      });
+
+      // Bind the zone duplicate button with the same guard pattern as delete:
+      // pointerdown + click with stopPropagation/preventDefault so the zone's drag
+      // logic never starts and the click survives an overlay re-render.
+      overlay.querySelectorAll('.btn-duplicate-zone-on-overlay').forEach(btn => {
+        const onDuplicate = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const zoneId = btn.dataset.zoneId;
+          if (!zoneId) return;
+          btn.dataset.zoneId = ''; // guard against double fire (pointerdown + click)
+          this.duplicatePriceZone(zoneId);
+        };
+        btn.addEventListener('pointerdown', onDuplicate);
+        btn.addEventListener('click', onDuplicate);
       });
       this.makeZonesDraggableAndResizable();
     } else {
@@ -1039,9 +1067,9 @@ setPriceEditorMode(mode) {
       };
 
       const onMouseDown = (e) => {
-        // Never start drag/resize when the press is on the delete (x) button:
-        // the button's own pointerdown handler removes the zone.
-        if (e.target.closest('.btn-delete-zone-on-overlay')) {
+        // Never start drag/resize when the press is on the delete (x) or duplicate
+        // button: those buttons have their own pointerdown handlers.
+        if (e.target.closest('.btn-delete-zone-on-overlay, .btn-duplicate-zone-on-overlay')) {
           e.stopPropagation();
           return;
         }
@@ -1182,6 +1210,63 @@ zone.addEventListener('mousedown', onMouseDown);
     if (this.selectedZoneId === zoneId) this.selectedZoneId = null;
     this.renderPriceZoneList();
     this.renderZoneOverlay();
+  }
+
+  /**
+   * Duplicate a price zone: an exact copy (same size / x / font / color / styles)
+   * with a brand new unique id, nudged slightly downward so it doesn't sit exactly
+   * on top of the original. If the original already touches the bottom edge, the
+   * copy is nudged a bit upward / sideways instead so it never fully covers it.
+   * The new zone becomes the selected zone and the config is marked dirty so it
+   * can be persisted with the Save button.
+   */
+  duplicatePriceZone(zoneId) {
+    const src = this.priceEditorZones.find(z => z.id === zoneId);
+    if (!src) return;
+
+    const clamp = (v, min, max) => Math.min(Math.max(Number(v) || 0, min), max);
+    const w = clamp(src.w_percent, 0, 100);
+    const h = clamp(src.h_percent, 0, 100);
+    const x = clamp(src.x_percent, 0, 100 - w);
+    const y = clamp(src.y_percent, 0, 100 - h);
+
+    // Shift down by the zone height plus a small gap, clamped inside the image.
+    const GAP = 1.5;
+    let newY = y + h + GAP;
+    let newX = x;
+    const maxY = 100 - h;
+    if (newY > maxY) {
+      // Original is at/near the bottom: try to sit above it instead.
+      newY = y - h - GAP;
+      if (newY < 0) {
+        // No room above either -> keep it clamped low and offset slightly sideways
+        // so the two rectangles are not 100% overlapping.
+        newY = maxY;
+        newX = clamp(x + (w / 2), 0, 100 - w);
+      }
+    }
+    const round1 = (v) => Math.round(v * 10) / 10;
+
+    const copy = {
+      ...src, // copies text / fontSize / fontFamily / color / textShadow / bold / backgroundColor
+      id: `zone-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      x_percent: round1(newX),
+      y_percent: round1(clamp(newY, 0, maxY)),
+      w_percent: round1(w),
+      h_percent: round1(h)
+    };
+
+    // Insert right after the original for a predictable position in the list.
+    const srcIndex = this.priceEditorZones.indexOf(src);
+    this.priceEditorZones.splice(srcIndex + 1, 0, copy);
+
+    this.selectedZoneId = copy.id;
+    this.markDirty();
+    this.renderPriceZoneList();
+    this.renderZoneOverlay();
+
+    // Keep the style controls (toolbar + sidebar) in sync with the new zone.
+    this.selectZone(copy.id);
   }
 
   closePriceEditor() {
