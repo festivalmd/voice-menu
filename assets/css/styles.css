@@ -48,6 +48,71 @@ body.header-visible #drinks-section {
   to { opacity: 1; }
 }
 
+/* Dark theme for form controls in modals */
+select {
+  background-color: #16213e !important;
+  color: white !important;
+  border-color: rgba(255,255,255,0.2) !important;
+}
+select option {
+  background-color: #16213e !important;
+  color: white !important;
+}
+select:focus {
+  border-color: #e94560 !important;
+  background-color: #1a2a4e !important;
+}
+
+/* File input dark theme */
+input[type="file"] {
+  color: white;
+}
+input[type="file"]::file-selector-button {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* Text inputs dark theme */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+textarea {
+  background-color: rgba(255,255,255,0.05) !important;
+  border-color: rgba(255,255,255,0.1) !important;
+  color: white !important;
+}
+
+/* Zone text input in the price editor (admin): black text by default. Higher
+   specificity than input[type="text"] so it overrides the white !important. */
+input.zone-text-edit {
+  color: #000000 !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: #e94560 !important;
+  background-color: rgba(255,255,255,0.1) !important;
+}
+input::placeholder {
+  color: rgba(255,255,255,0.4) !important;
+}
+
+/* Ensure modal content has dark background */
+.bg-secondary {
+  background-color: #16213e !important;
+}
+
 @keyframes slideUp {
   from { 
     opacity: 0;
@@ -89,6 +154,30 @@ button, a {
 /* Nav button active state */
 .nav-btn.active {
   color: #e94560;
+}
+
+/* Horizontal page overflow safety: never allow horizontal scroll on the page itself.
+   `clip` does not create a scroll container (better than `hidden` for sticky/fixed). */
+html, body {
+  overflow-x: clip;
+}
+
+/* Mobile (<768px): horizontal nav scrolls inside its own container, scrollbar hidden.
+   Desktop (md:) keeps the original centered, non-scrollable layout. */
+@media (max-width: 767px) {
+  #horizontal-nav {
+    overflow-x: auto;
+    justify-content: flex-start;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  #horizontal-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-btn {
+    flex: 0 0 auto;
+  }
 }
 
 /* Language button active state */
@@ -332,5 +421,745 @@ button, a {
   
   .promo-text {
     animation: none;
+  }
+}
+
+/* Image wrapper for price overlays */
+.image-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+  /* Establish a containment context so price tag font sizes can be expressed
+     relative to the image width (container query units: cqw). */
+  container-type: inline-size;
+}
+
+/* The image must fill the wrapper EXACTLY - no gaps / no letterboxing.
+   Declared explicitly here (not only via Tailwind utilities) so the wrapper
+   always hugs the image and the overlay (inset:0) covers the image precisely,
+   even if the Tailwind CDN fails to load. */
+.image-wrapper > img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+/* Price overlay container */
+.price-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Price tag = an exact copy of the zone rectangle drawn in the admin:
+   NO padding / border / radius / shadow, text centered, and it occupies the zone
+   size (width/height in %) so it never paints a plate larger than the drawn box. */
+.price-tag {
+  position: absolute;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: none !important;
+  border-radius: 6px;
+  box-shadow: none !important;
+  overflow: hidden;
+  /* No plate: only the price text is drawn over the image. */
+  background: transparent !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+  color: #000000;
+  font-weight: 800;
+  white-space: nowrap;
+  pointer-events: none;
+  /* Fluid font size: scales with the image (container) width. Default == 14px
+     baseline (14/5.6 = 2.5cqw); the exact per-zone size is set inline by JS. */
+  font-size: clamp(8px, 2.5cqw, 96px);
+}
+
+/* Price tag in admin editor (draggable) */
+.price-tag.dragging {
+  z-index: 100;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* Admin Panel Styles */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: fadeOut 0.3s ease-in forwards;
+}
+
+.sortable-ghost {
+  opacity: 0.4;
+  background: #e94560 !important;
+  border: 2px dashed #e94560;
+}
+
+.sortable-chosen {
+  background: #16213e;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.drop-zone.active {
+  border-color: #e94560;
+  background: rgba(233, 69, 96, 0.1);
+}
+
+.tab-btn {
+  transition: all 0.2s ease;
+}
+
+.nav-btn-item, .image-item {
+  transition: all 0.2s ease;
+}
+
+.nav-btn-item:hover, .image-item:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.sortable-images .image-item {
+  cursor: grab;
+}
+
+.sortable-images .image-item:active {
+  cursor: grabbing;
+}
+
+.sortable-images .image-item.sortable-chosen {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Upload progress */
+.progress-bar {
+  transition: width 0.3s ease;
+}
+
+/* Modal backdrop blur */
+.fixed.inset-0.bg-black\/80 {
+  backdrop-filter: blur(4px);
+}
+
+/* Admin input focus */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #e94560;
+  box-shadow: 0 0 0 3px rgba(233, 69, 96, 0.2);
+}
+
+/* Admin button states */
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Toast animations */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideOutRight {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(100%); }
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.animate-fade-out {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+/* Admin Panel Responsive Styles */
+@media (max-width: 768px) {
+  .price-editor-modal .max-w-7xl {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+    max-height: 100vh;
+  }
+  
+  .price-editor-modal .max-h-\[90vh\] {
+    max-height: 100vh;
+  }
+  
+  .price-editor-modal .flex-1 {
+    min-height: 0;
+  }
+  
+  .price-editor-modal .p-4 {
+    padding: 0.5rem;
+  }
+  
+  .price-editor-modal .sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  /* Toolbar responsive */
+  #price-toolbar {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  #price-toolbar label,
+  #price-toolbar select,
+  #price-toolbar button {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .color-btn {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  /* Sidebar hidden on mobile */
+  #price-sidebar {
+    display: none !important;
+  }
+  
+  /* Modal responsive */
+  .price-editor-modal .max-w-7xl {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .price-editor-modal .max-h-\[90vh\] {
+    max-height: 100vh;
+  }
+  
+  .price-editor-modal .overflow-hidden {
+    overflow: hidden;
+  }
+  
+  /* Image container responsive */
+  #price-editor-container {
+    min-height: 200px;
+  }
+  
+  /* Image responsive */
+  #price-editor-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Overlay responsive */
+  #price-editor-overlay {
+    position: absolute;
+    inset: 0;
+  }
+  
+  /* Price zones responsive */
+  .price-zone {
+    position: absolute !important;
+  }
+  
+  /* Toolbar responsive */
+  #price-toolbar {
+    padding: 0.5rem 0.75rem !important;
+    flex-wrap: wrap !important;
+    gap: 0.5rem !important;
+  }
+  
+  #price-toolbar label,
+  #price-toolbar select,
+  #price-toolbar button {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .color-btn {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  /* Modal responsive */
+  .price-editor-modal .max-w-7xl {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+  
+  .price-editor-modal .max-h-\[90vh\] {
+    max-height: 100vh;
+  }
+  
+  .price-editor-modal .overflow-hidden {
+    overflow: hidden;
+  }
+  
+  /* Toolbar responsive */
+  #price-toolbar {
+    padding: 0.5rem 0.75rem !important;
+    gap: 0.5rem !important;
+  }
+  
+  #price-toolbar label,
+  #price-toolbar select,
+  #price-toolbar button {
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .color-btn {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  /* Sidebar hidden on mobile */
+  #price-sidebar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .price-editor-modal .p-4 {
+    padding: 0.5rem !important;
+  }
+  
+  .price-editor-modal .text-lg {
+    font-size: 1rem !important;
+  }
+  
+  .price-editor-modal .text-lg {
+    font-size: 1rem !important;
+  }
+  
+  .mode-btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .price-editor-modal .px-4 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .price-editor-modal .py-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  
+  .price-editor-modal .py-1\.5 {
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+  }
+  
+  .price-editor-modal .px-3 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  
+  .price-editor-modal .px-2 {
+    padding-left: 0.375rem !important;
+    padding-right: 0.375rem !important;
+  }
+  
+  .price-editor-modal .text-lg {
+    font-size: 1rem !important;
+  }
+  
+  .price-editor-modal .text-sm {
+    font-size: 0.75rem !important;
+  }
+  
+  .price-editor-modal .text-xs {
+    font-size: 0.625rem !important;
+  }
+  
+  .price-editor-modal .text-base {
+    font-size: 0.875rem !important;
+  }
+  
+  .price-editor-modal .gap-4 {
+    gap: 0.5rem !important;
+  }
+  
+  .price-editor-modal .gap-3 {
+    gap: 0.375rem !important;
+  }
+  
+  .price-editor-modal .gap-2 {
+    gap: 0.25rem !important;
+  }
+}
+
+/* Ensure modals work on mobile */
+@media (max-width: 768px) {
+  .fixed.inset-0 {
+    padding: 0.5rem !important;
+  }
+  
+  .fixed.inset-0 > div {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+  
+  .fixed.inset-0 .flex-1 {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* Ensure proper touch handling */
+@media (pointer: coarse) {
+  .price-zone {
+    touch-action: none;
+  }
+  
+  .price-tag-editor {
+    touch-action: none;
+  }
+  
+  .price-editor-overlay {
+    touch-action: none;
+  }
+  
+  .price-editor-image {
+    touch-action: manipulation;
+  }
+  
+  .mode-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .color-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  .mode-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  #price-editor-close,
+  #price-editor-save,
+  #price-editor-close {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+/* Ensure image container is responsive */
+#price-editor-container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 200px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Wrapper that exactly matches the image display area (no letterboxing).
+   Its width/height are set in px by JS after the image loads. */
+#price-editor-wrapper {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  line-height: 0;
+  /* Same containment as the client (.image-wrapper) so zone text font sizes
+     expressed in `cqw` render 1:1 with what the user/visitor sees. */
+  container-type: inline-size;
+}
+
+/* Image fills the wrapper exactly (wrapper keeps the image aspect ratio) */
+#price-editor-image {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+}
+
+/* Overlay matches the wrapper (= image area) exactly, inset:0 */
+#price-editor-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+}
+
+/* Price zone positioning fix */
+.price-zone {
+  position: absolute !important;
+  box-sizing: border-box !important;
+  /* No colored fill inside zones - only the thin contour of the inner border is shown. */
+  background: transparent !important;
+}
+
+/* Zone delete (x) button in the admin overlay: must always be clickable and on
+   top of the zone (drag/resize) so it can be pressed reliably. */
+.btn-delete-zone-on-overlay {
+  pointer-events: auto !important;
+  z-index: 30 !important;
+  cursor: pointer;
+}
+
+/* Ensure price tags scale properly */
+.price-tag {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix for mobile modal */
+@media (max-width: 640px) {
+  .price-editor-modal {
+    padding: 0 !important;
+  }
+  
+  .price-editor-modal > div {
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+  
+  .price-editor-modal .sticky {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 20 !important;
+  }
+  
+  .price-editor-modal .overflow-hidden {
+    overflow: hidden !important;
+  }
+  
+  .price-editor-modal .flex-1 {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  
+  /* Ensure the container fits */
+  #price-editor-container {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 200px !important;
+  }
+  
+  #price-editor-image {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  #price-editor-overlay {
+    position: absolute !important;
+    inset: 0 !important;
+  }
+}
+
+/* Fix for admin panel tabs on mobile */
+@media (max-width: 768px) {
+  .tab-btn {
+    padding: 0.5rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  
+  .tab-btn svg {
+    width: 1rem !important;
+    height: 1rem !important;
+  }
+  
+  .tab-content {
+    padding: 0.5rem !important;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 1rem !important;
+  }
+  
+  .space-y-4 > * + * {
+    margin-top: 0.75rem !important;
+  }
+  
+  .space-y-3 > * + * {
+    margin-top: 0.5rem !important;
+  }
+}
+
+/* Fix for inputs on mobile */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="color"],
+  select,
+  textarea {
+    font-size: 16px !important; /* Prevents zoom on iOS */
+  }
+  
+  input[type="color"] {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  input[type="checkbox"] {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+}
+
+/* Ensure proper z-index stacking */
+.price-editor-modal {
+  z-index: 100 !important;
+}
+
+.price-editor-modal .sticky {
+  z-index: 10 !important;
+}
+
+.price-editor-modal .fixed {
+  z-index: 20 !important;
+}
+
+/* Fix for color picker on mobile */
+@media (max-width: 768px) {
+  input[type="color"] {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    border: none !important;
+    background: none !important;
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0 !important;
+  }
+  
+  input[type="color"]::-webkit-color-swatch {
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    border-radius: 0.25rem !important;
+  }
+}
+
+/* Ensure touch targets are large enough */
+@media (pointer: coarse) {
+  button, a, input[type="checkbox"], input[type="radio"], select {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .color-btn {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  .mode-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  #price-editor-close,
+  #price-editor-save,
+  #price-editor-close {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+  
+  .mode-btn {
+    min-height: 44px !important;
+    min-width: 44px !important;
+  }
+}
+
+/* Fix for modal close button on mobile */
+@media (max-width: 768px) {
+  #price-editor-close {
+    padding: 0.75rem !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  #price-editor-close svg {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+}
+
+/* Ensure price zones are visible on mobile */
+@media (max-width: 768px) {
+  /* Do NOT force min-width/min-height on .price-zone: zones are positioned and
+     sized with percentages, so a forced pixel minimum breaks alignment. */
+
+  .zone-resize-handle {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+  
+  .btn-delete-zone-on-overlay {
+    width: 2rem !important;
+    height: 2rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+/* Ensure price tags display properly on mobile */
+@media (max-width: 768px) {
+  /* Keep the tag an exact rectangle of the zone: no padding; radius restored. */
+  .price-tag {
+    padding: 0;
+    border-radius: 6px;
+  }
+  
+  .price-overlay {
+    z-index: 10 !important;
+  }
+}
+
+/* Fix for modal overlay on mobile */
+@media (max-width: 768px) {
+  .fixed.inset-0.bg-black\/90 {
+    padding: 0.5rem !important;
+  }
+  
+  .fixed.inset-0 > div {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+    height: 100vh !important;
+  }
+}
+
+/* Ensure proper touch handling */
+@media (pointer: coarse) {
+  .price-zone {
+    touch-action: none;
+  }
+  
+  .price-tag-editor {
+    touch-action: none;
+  }
+  
+  .price-editor-overlay {
+    touch-action: none;
+  }
+  
+  .price-editor-image {
+    touch-action: manipulation;
   }
 }

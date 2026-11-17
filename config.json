@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "navigation": {
+    "horizontal": [
+      { "id": "food", "labelKey": "nav.food", "target": "food-section" },
+      { "id": "drinks", "labelKey": "nav.drinks", "target": "drinks-section" },
+      { "id": "promo", "labelKey": "nav.promo", "target": "promo-modal" },
+      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal" }
+    ],
+    "vertical": [
+      { "id": "food", "labelKey": "nav.food", "target": "food-section", "icon": "utensils" },
+      { "id": "drinks", "labelKey": "nav.drinks", "target": "drinks-section", "icon": "martini" },
+      { "id": "promo", "labelKey": "nav.promo", "target": "promo-modal", "icon": "flame" },
+      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal", "icon": "cake" }
+    ]
+  },
+  "sections": [
+    {
+      "id": "hero-section",
+      "titleKey": "Start Background",
+      "images": []
+    },
+    {
+      "id": "food-section",
+      "titleKey": "sections.food",
+      "images": [
+        { "id": "food-1", "src": "/assets/images/menu/food-page-1.jpg", "alt": "Food Menu Page 1", "prices": [] },
+        { "id": "food-2", "src": "/assets/images/menu/food-page-2.jpg", "alt": "Food Menu Page 2", "prices": [] },
+        { "id": "food-3", "src": "/assets/images/menu/food-page-3.jpg", "alt": "Food Menu Page 3", "prices": [] },
+        { "id": "food-4", "src": "/assets/images/menu/food-page-4.jpg", "alt": "Food Menu Page 4", "prices": [] },
+        { "id": "food-5", "src": "/assets/images/menu/food-page-5.jpg", "alt": "Food Menu Page 5", "prices": [] }
+      ]
+    },
+    {
+      "id": "drinks-section",
+      "titleKey": "sections.drinks",
+      "images": [
+        { "id": "drinks-1", "src": "/assets/images/menu/drinks-page-1.jpg", "alt": "Drinks Menu Page 1", "prices": [] },
+        { "id": "drinks-2", "src": "/assets/images/menu/drinks-page-2.jpg", "alt": "Drinks Menu Page 2", "prices": [] },
+        { "id": "drinks-3", "src": "/assets/images/menu/drinks-page-3.jpg", "alt": "Drinks Menu Page 3", "prices": [] },
+        { "id": "drinks-4", "src": "/assets/images/menu/drinks-page-4.jpg", "alt": "Drinks Menu Page 4", "prices": [] },
+        { "id": "drinks-5", "src": "/assets/images/menu/drinks-page-5.jpg", "alt": "Drinks Menu Page 5", "prices": [] },
+        { "id": "drinks-6", "src": "/assets/images/menu/drinks-page-6.jpg", "alt": "Drinks Menu Page 6", "prices": [] },
+        { "id": "drinks-7", "src": "/assets/images/menu/drinks-page-7.jpg", "alt": "Drinks Menu Page 7", "prices": [] },
+        { "id": "drinks-8", "src": "/assets/images/menu/drinks-page-8.jpg", "alt": "Drinks Menu Page 8", "prices": [] },
+        { "id": "drinks-9", "src": "/assets/images/menu/drinks-page-9.jpg", "alt": "Drinks Menu Page 9", "prices": [] },
+        { "id": "drinks-10", "src": "/assets/images/menu/drinks-page-10.jpg", "alt": "Drinks Menu Page 10", "prices": [] },
+        { "id": "drinks-11", "src": "/assets/images/menu/drinks-page-11.jpg", "alt": "Drinks Menu Page 11", "prices": [] }
+      ]
+    },
+    {
+      "id": "promo-modal",
+      "titleKey": "promo.title",
+      "images": [
+        { "id": "promo-1", "src": "/assets/images/menu/promo-page-1.jpg", "alt": "Promo Set Page 1", "prices": [] },
+        { "id": "promo-2", "src": "/assets/images/menu/promo-page-2.jpg", "alt": "Promo Set Page 2", "prices": [] }
+      ]
+    },
+    {
+      "id": "birthday-modal",
+      "titleKey": "birthday.title",
+      "images": [
+        { "id": "birthday-1", "src": "/assets/images/menu/birthday-page-1.jpg", "alt": "Birthday Offer Page 1", "prices": [] },
+        { "id": "birthday-2", "src": "/assets/images/menu/birthday-page-2.jpg", "alt": "Birthday Offer Page 2", "prices": [] }
+      ]
+    }
+  ]
+}

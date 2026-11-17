@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a2e">
+  <title>Admin Panel - MENU VOICE CLUB</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1a1a2e',
+            secondary: '#16213e',
+            accent: '#e94560',
+            gold: '#ffd700'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="/assets/css/styles.css">
+  <style>
+    .sortable-ghost { opacity: 0.4; background: #e94560 !important; }
+    .sortable-chosen { background: #16213e; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+    .drop-zone.active { border-color: #e94560; background: rgba(233, 69, 96, 0.1); }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    .nav-btn-item, .image-item { transition: all 0.2s ease; }
+    .nav-btn-item:hover, .image-item:hover { background: rgba(255,255,255,0.05); }
+    .sortable-images .image-item { cursor: grab; }
+    .sortable-images .image-item.sortable-chosen { transform: scale(1.02); }
+    .lang-field { transition: all 0.2s ease; }
+    .lang-field:focus-within { background: rgba(233, 69, 96, 0.1); }
+    .btn-move { transition: all 0.15s ease; }
+    .btn-move:hover { background: #e94560; color: white; }
+    .btn-move:disabled { opacity: 0.3; cursor: not-allowed; }
+    .save-indicator { transition: all 0.3s ease; }
+    .save-indicator.saved { background: #10b981; }
+    .save-indicator.saving { background: #f59e0b; }
+    .save-indicator.error { background: #ef4444; }
+    .price-tag-editor { cursor: grab; }
+    .price-tag-editor.dragging { cursor: grabbing; z-index: 100; }
+    .image-item .btn-prices { transition: all 0.15s ease; }
+    .image-item .btn-prices:hover { background: #e94560; color: white; }
+    .lang-tab { transition: all 0.15s ease; }
+    .lang-tab.active { background: #e94560; color: white; }
+    .lang-tab:not(.active) { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.7); }
+    .lang-tab:not(.active):hover { background: rgba(255,255,255,0.1); color: white; }
+  </style>
+</head>
+<body class="bg-primary text-white min-h-screen font-sans antialiased">
+  <!-- Admin Header with Save Button -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-primary/95 backdrop-blur-sm border-b border-white/10">
+    <div class="flex items-center justify-between px-4 py-3">
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-bold">Admin Panel - MENU VOICE CLUB</h1>
+        <span id="save-indicator" class="save-indicator px-3 py-1 rounded-full text-xs font-medium text-white hidden">Saved</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="btn-save-all" class="px-5 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 01-2 2h-3m-6 0v6m0-6H6"/></svg>
+          Save Changes
+        </button>
+        <a href="/" class="text-white/70 hover:text-white text-sm">← Back to Menu</a>
+      </div>
+    </header>
+  </header>
+
+  <main class="pt-20 pb-10 px-4 max-w-6xl mx-auto">
+    <!-- Tab Navigation -->
+    <div class="flex gap-2 mb-6 border-b border-white/10">
+      <button id="tab-nav" class="tab-btn px-4 py-2 text-sm font-medium rounded-t-lg bg-white/10 text-white/80 hover:bg-white/20 transition-colors" data-tab="navigation">Navigation</button>
+      <button id="tab-images" class="tab-btn px-4 py-2 text-sm font-medium rounded-t-lg bg-white/5 text-white/60 hover:bg-white/10 transition-colors" data-tab="images">Images</button>
+    </div>
+
+    <!-- Navigation Tab -->
+    <div id="tab-content-navigation" class="tab-content active space-y-6">
+      <!-- Horizontal Navigation -->
+      <section class="bg-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Horizontal Navigation (Header)
+          </h2>
+        </div>
+        <div id="horizontal-nav-list" class="space-y-3"></div>
+      </section>
+
+      <!-- Vertical Navigation -->
+      <section class="bg-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            Vertical Navigation (Hero)
+          </h2>
+        </div>
+        <div id="vertical-nav-list" class="space-y-3"></div>
+      </section>
+    </div>
+
+    <!-- Images Tab -->
+    <div id="tab-content-images" class="tab-content space-y-6">
+      <section>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            Images Management
+          </h2>
+          <div class="flex gap-2">
+            <input type="file" id="image-upload" accept="image/*" class="hidden" multiple>
+            <button id="btn-upload" class="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-red-600 transition-colors">
+              <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+              Upload Images
+            </button>
+          </div>
+        </div>
+
+        <!-- Drop zone -->
+        <div id="drop-zone" class="drop-zone border-2 border-dashed border-white/20 rounded-xl p-8 text-center hover:border-accent transition-colors mb-6">
+          <svg class="w-12 h-12 mx-auto text-white/30 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <p class="text-white/60">Drag & drop images here, or click "Upload Images"</p>
+          <p class="text-xs text-white/40 mt-1">Supports: JPG, PNG, WebP</p>
+        </div>
+
+        <!-- Sections with sortable images -->
+        <div id="images-sections" class="space-y-6"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Upload Modal - Select files, choose section, then upload -->
+  <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80">
+    <div class="bg-secondary rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[80vh] flex flex-col">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold">Upload Images</h3>
+        <button id="close-upload-modal" class="p-2 text-white/50 hover:text-white transition-colors" title="Close">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      
+      <!-- File previews -->
+      <div id="upload-file-previews" class="mb-4 max-h-48 overflow-y-auto space-y-2">
+        <!-- File previews will be inserted here -->
+      </div>
+      
+      <!-- Section selector -->
+      <div class="mb-4">
+        <label class="text-xs text-white/70 block mb-1">Upload to section:</label>
+        <select id="upload-section-select" class="w-full bg-white/5 border border-white/20 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent focus:bg-white/10">
+          <!-- Options populated dynamically -->
+        </select>
+      </div>
+      
+      <!-- Action buttons -->
+      <div class="flex gap-3 justify-end mt-auto">
+        <button id="cancel-upload-modal" class="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">Cancel</button>
+        <button id="confirm-upload-modal" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-red-600 transition-colors">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80">
+    <div class="bg-secondary rounded-xl p-6 w-full max-w-md mx-4">
+      <h3 id="confirm-title" class="text-lg font-semibold mb-2"></h3>
+      <p id="confirm-message" class="text-white/70 mb-6"></p>
+      <div class="flex gap-3 justify-end">
+        <button id="confirm-cancel" class="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">Cancel</button>
+        <button id="confirm-ok" class="px-4 py-2 bg-accent text-white rounded-lg hover:bg-red-600 transition-colors">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Price Editor Modal -->
+  <div id="price-editor-modal" class="fixed inset-0 z-60 hidden flex items-center justify-center bg-black/90 p-2 sm:p-4">
+    <div class="bg-secondary rounded-xl w-full max-w-7xl h-[90vh] max-h-[90vh] sm:max-h-[90vh] mx-auto overflow-hidden flex flex-col">
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border-b border-white/10 sticky top-0 bg-secondary/95 backdrop-blur-sm z-10 gap-2 sm:gap-4">
+        <h3 id="price-editor-title" class="text-base sm:text-lg font-semibold">Price Editor</h3>
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4 w-full sm:w-auto">
+          <!-- Mode Toggle -->
+          <div class="flex bg-white/5 rounded-lg p-1" role="group" aria-label="Editor mode">
+            <button id="mode-price" class="mode-btn px-2 sm:px-3 py-1 py-1.5 text-xs sm:text-sm font-medium rounded-md bg-white/10 text-white/70 hover:bg-white/20" data-mode="price">PRICE</button>
+            <button id="mode-place" class="mode-btn px-2 sm:px-3 py-1 py-1.5 text-xs sm:text-sm font-medium rounded-md bg-accent text-white" data-mode="place">PRICE PLACE</button>
+          </div>
+          <button id="price-editor-save" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-accent text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-red-600 transition-colors">Save</button>
+          <button id="price-editor-close" class="px-3 sm:px-4 py-1.5 sm:py-2 bg-white/10 text-white text-xs sm:text-sm font-medium rounded-lg hover:bg-white/20 transition-colors">Close</button>
+        </div>
+      </div>
+      
+      <!-- Toolbar (shown in PRICE mode) -->
+      <div id="price-toolbar" class="hidden px-3 sm:px-4 py-2 sm:py-3 border-b border-white/10 bg-primary/50 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 flex-wrap">
+        <label class="text-xs text-white/50">Font Size:</label>
+        <select class="js-price-font-size bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1 sm:py-1.5 text-white text-xs sm:text-sm focus:outline-none focus:border-accent">
+          <option value="10">10px</option>
+          <option value="12">12px</option>
+          <option value="14">14px</option>
+          <option value="16">16px</option>
+          <option value="18">18px</option>
+          <option value="20" selected>20px</option>
+          <option value="24">24px</option>
+        </select>
+        <label class="text-xs text-white/50">Color:</label>
+        <div class="flex items-center gap-1">
+          <button class="color-btn w-5 sm:w-6 h-5 sm:h-6 rounded border-2 border-transparent" data-color="#1a1a2e" style="background:#1a1a2e" title="Dark Gray"></button>
+          <button class="color-btn w-5 sm:w-6 h-5 sm:h-6 rounded border-2 border-accent" data-color="#000000" style="background:#000000" title="Black"></button>
+          <button class="color-btn w-5 sm:w-6 h-5 sm:h-6 rounded border-2 border-transparent" data-color="#e94560" style="background:#e94560" title="Accent"></button>
+          <button class="color-btn w-5 sm:w-6 h-5 sm:h-6 rounded border-2 border-transparent" data-color="#ffffff" style="background:#ffffff" title="White"></button>
+          <button class="color-btn w-5 sm:w-6 h-5 sm:h-6 rounded border-2 border-transparent" data-color="#ffd700" style="background:#ffd700" title="Gold"></button>
+        </div>
+        <span class="text-xs text-white/40 ml-auto">PRICE PLACE: Drag rectangles | PRICE: Click zone to edit</span>
+      </div>
+      
+      <!-- Editor Area -->
+      <div class="flex-1 overflow-hidden p-2 sm:p-4 relative flex">
+        <div class="flex-1 overflow-hidden p-2 sm:p-4 relative">
+          <div id="price-editor-container" class="relative w-full h-full">
+            <!-- Image will be inserted here -->
+          </div>
+        </div>
+        
+        <!-- Sidebar (only visible in PRICE mode on lg+) -->
+        <div id="price-sidebar" class="hidden lg:block w-full lg:w-64 xl:w-72 border-l border-white/10 bg-primary/50 p-3 sm:p-4 overflow-auto flex-shrink-0">
+          <h4 class="font-semibold mb-3 flex items-center gap-2">
+            <svg class="w-4 h-4 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0l1-1m-1 1l-1-1"/></svg>
+            Price Style
+          </h4>
+          
+          <div class="space-y-3">
+            <!-- Font Size -->
+            <div>
+              <label class="text-xs text-white/50 block mb-1">Font Size</label>
+              <select id="price-font-size" class="js-price-font-size w-full bg-white/5 border border-white/10 rounded px-2 sm:px-3 py-1.5 text-white text-xs focus:outline-none focus:border-accent">
+                <option value="10">10px</option>
+                <option value="12">12px</option>
+                <option value="14">14px</option>
+                <option value="16">16px</option>
+                <option value="18">18px</option>
+                <option value="20" selected>20px</option>
+                <option value="24">24px</option>
+              </select>
+            </div>
+            
+            <!-- Color -->
+            <div>
+              <label class="text-xs text-white/50 block mb-1">Text Color</label>
+              <div class="flex items-center gap-2">
+                <input type="color" id="price-text-color" value="#000000" class="js-price-color w-8 h-8 sm:w-10 sm:h-10 rounded border-2 border-white/20 cursor-pointer">
+              </div>
+            </div>
+            
+            <!-- Text Shadow -->
+            <div>
+              <label class="text-xs text-white/50 flex items-center gap-2">
+                <input type="checkbox" id="price-text-shadow" class="js-price-shadow w-4 h-4 rounded border-white/30 text-accent focus:ring-accent">
+                <span>Text Shadow</span>
+              </label>
+            </div>
+            
+            <!-- Font Weight (Bold by default; uncheck for Regular) -->
+            <div>
+              <label class="text-xs text-white/50 flex items-center gap-2">
+                <input type="checkbox" id="price-text-bold" class="js-price-bold w-4 h-4 rounded border-white/30 text-accent focus:ring-accent" checked>
+                <span>Bold</span>
+              </label>
+            </div>
+            
+            <!-- Price Hint -->
+            <p id="price-hint" class="text-xs text-white/40 mt-4 text-center">PRICE PLACE: Drag to create zones. PRICE: Click zone to edit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+
+  <script src="/assets/js/admin.js"></script>
+  <script>
+    initializeAdmin();
+  </script>
+</body>
+</html>

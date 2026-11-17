@@ -1,0 +1,17 @@
+name = "voice-menu"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "."
+
+# KV namespace binding
+[[kv_namespaces]]
+binding = "CONFIG"
+id = "ffa4b724a89343c09dc8da25a6b06386"
+preview_id = "ffa4b724a89343c09dc8da25a6b06386"
+
+# R2 bucket binding
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "voicemenu"
+
+# Environment variables (set via wrangler secret put for production)
+# For local development, use .dev.vars file

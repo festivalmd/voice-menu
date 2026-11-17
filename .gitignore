@@ -1,0 +1,38 @@
+# ===== Cloudflare Wrangler: local dev state (auto-generated, ~40 MB / 800+ files) =====
+# .wrangler/ holds tmp bundles, local KV/R2/D1 state and cache from `wrangler pages dev`.
+# It is regenerated on every dev run and must never be committed.
+.wrangler/
+.wrangler-dev.log
+
+# ===== Local secrets / env (NEVER commit) =====
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# ===== Tooling / agent metadata =====
+.kilo/
+
+# ===== Logs =====
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Ad-hoc test artifacts =====
+test.jpg
+test2.jpg
+test3.jpg
+test-config.json
+
+# ===== Dependencies (if/when added) =====
+node_modules/
+
+# ===== OS / editor cruft =====
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
