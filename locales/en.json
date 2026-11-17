@@ -3,7 +3,8 @@
     "food": "FOOD",
     "drinks": "DRINKS",
     "promo": "PROMO SET",
-    "birthday": "BIRTHDAY OFFER"
+    "birthday": "BIRTHDAY OFFER",
+    "karaoke": "KARAOKE"
   },
   "common": {
     "back": "BACK"

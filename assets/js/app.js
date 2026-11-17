@@ -28,6 +28,7 @@ class BarMenuApp {
     // Render everything from config
     this.renderHeroBackground();
     this.renderNavigation();
+    this.renderHeroTitle();
     this.renderSections();
     this.renderModals();
     
@@ -74,7 +75,7 @@ class BarMenuApp {
     const horizontalNav = document.getElementById('horizontal-nav');
     if (horizontalNav && this.config?.navigation?.horizontal) {
       horizontalNav.innerHTML = this.config.navigation.horizontal.map(btn => `
-        <button class="nav-btn shrink-0 md:flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="${btn.id}" data-i18n="${btn.labelKey}">${btn.id.toUpperCase()}</button>
+        <button class="nav-btn shrink-0 md:flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="${btn.id}"${btn.link ? ` data-external-url="${btn.link}"` : ''} data-i18n="${btn.labelKey}">${btn.id.toUpperCase()}</button>
       `).join('');
     }
 
@@ -85,7 +86,9 @@ class BarMenuApp {
         utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2v0a5 5 0 0 0-5 5v8c0 1.1.9 2 2 2h3Zm0 0v5"/>',
         martini: '<path d="M8 22h8"/><path d="M12 11v11"/><path d="m19 3-7 8-7-8Z"/>',
         flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
-        cake: '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16h16"/><path d="M12 11V7"/><path d="M8 11V8"/><path d="M16 11V8"/><path d="M12 4v.01"/><path d="M8 5v.01"/><path d="M16 5v.01"/>'
+        cake: '<path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16h16"/><path d="M12 11V7"/><path d="M8 11V8"/><path d="M16 11V8"/><path d="M12 4v.01"/><path d="M8 5v.01"/><path d="M16 5v.01"/>',
+        // Retro microphone: round head with grille + stand/base
+        mic: '<circle cx="12" cy="8" r="5"/><path d="M7.5 6.5h9"/><path d="M7 8.5h10"/><path d="M7.5 10.5h9"/><path d="M12 13v5.5"/><path d="M9.5 21h5"/><path d="M12 18.5V21"/>'
       };
 
       verticalNav.innerHTML = this.config.navigation.vertical.map(btn => {
@@ -95,7 +98,7 @@ class BarMenuApp {
         const btnClass = isPromo ? 'transition-colors' : 'text-white hover:text-accent transition-colors';
         
         return `
-          <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold ${btnClass} rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="${btn.id}">
+          <button class="hero-nav-btn w-full py-6 px-6 text-center text-lg font-semibold ${btnClass} rounded-lg bg-white/5 backdrop-blur-sm border border-white/10 active:bg-white/10" data-nav="${btn.id}"${btn.link ? ` data-external-url="${btn.link}"` : ''}>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 8px;">${iconPath}</svg>
             <span class="${textClass}" data-i18n="${btn.labelKey}">${btn.id.toUpperCase()}</span>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-left: 8px;">${iconPath}</svg>
@@ -103,6 +106,21 @@ class BarMenuApp {
         `;
       }).join('');
     }
+  }
+
+  renderHeroTitle() {
+    const container = document.getElementById('hero-title-container');
+    if (!container) return;
+    // The big "MENU" heading above all hero buttons. `enabled` defaults to true so
+    // configs saved before this option existed keep showing it; the admin panel can
+    // switch it off (Navigation tab -> Hero MENU Title).
+    const enabled = this.config?.navigation?.menuTitle?.enabled !== false;
+    // Selectable visual style (admin: Navigation tab -> Hero MENU Title).
+    // Falls back to "gold" for configs saved before the option existed.
+    const style = this.config?.navigation?.menuTitle?.style || 'gold';
+    container.innerHTML = enabled
+      ? `<h1 class="hero-menu-title menu-style-${style}" aria-label="Menu">MENU</h1>`
+      : '';
   }
 
   renderSections() {
@@ -319,6 +337,15 @@ class BarMenuApp {
   handleNavClick(e) {
     const btn = e.currentTarget;
     const target = btn.getAttribute('data-nav');
+
+    // Buttons with an external link (e.g. KARAOKE) open another project in a
+    // brand new window. The current menu stays exactly as it is: no active
+    // state, no scroll, no modal.
+    const externalUrl = btn.getAttribute('data-external-url');
+    if (externalUrl) {
+      window.open(externalUrl, '_blank', 'noopener,noreferrer');
+      return;
+    }
     
     // Update active state
     document.querySelectorAll('[data-nav]').forEach(b => b.classList.remove('active'));

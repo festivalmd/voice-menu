@@ -1,17 +1,20 @@
 {
   "version": 1,
   "navigation": {
+    "menuTitle": { "enabled": true, "style": "gold" },
     "horizontal": [
       { "id": "food", "labelKey": "nav.food", "target": "food-section" },
       { "id": "drinks", "labelKey": "nav.drinks", "target": "drinks-section" },
       { "id": "promo", "labelKey": "nav.promo", "target": "promo-modal" },
-      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal" }
+      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal" },
+      { "id": "karaoke", "labelKey": "nav.karaoke", "target": "karaoke", "link": "" }
     ],
     "vertical": [
       { "id": "food", "labelKey": "nav.food", "target": "food-section", "icon": "utensils" },
       { "id": "drinks", "labelKey": "nav.drinks", "target": "drinks-section", "icon": "martini" },
       { "id": "promo", "labelKey": "nav.promo", "target": "promo-modal", "icon": "flame" },
-      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal", "icon": "cake" }
+      { "id": "birthday", "labelKey": "nav.birthday", "target": "birthday-modal", "icon": "cake" },
+      { "id": "karaoke", "labelKey": "nav.karaoke", "target": "karaoke", "icon": "mic", "link": "" }
     ]
   },
   "sections": [

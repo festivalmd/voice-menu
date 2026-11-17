@@ -58,12 +58,47 @@ class AdminPanel {
     }
   }
 
+  // Ensure the KARAOKE button exists in both navigations (migration for configs
+  // saved before it was introduced). It always sits right after BIRTHDAY OFFER.
+  // Its optional `link` opens another project in a brand new window.
+  ensureKaraokeNav() {
+    if (!this.config || !this.config.navigation) return;
+    const ensure = (arr, icon) => {
+      if (!Array.isArray(arr)) return;
+      if (arr.some(b => b.id === 'karaoke')) return;
+      const btn = { id: 'karaoke', labelKey: 'nav.karaoke', target: 'karaoke', link: '' };
+      if (icon) btn.icon = icon;
+      const idx = arr.findIndex(b => b.id === 'birthday');
+      arr.splice(idx === -1 ? arr.length : idx + 1, 0, btn);
+    };
+    ensure(this.config.navigation.horizontal);
+    ensure(this.config.navigation.vertical, 'mic');
+  }
+
+  // "MENU" hero title switch. Defaults to ON for configs saved before it existed,
+  // so the title keeps showing until the admin explicitly turns it off.
+  // Also migrates the visual style option (gold | neon | editorial | glass).
+  ensureMenuTitle() {
+    if (!this.config) return;
+    if (!this.config.navigation) this.config.navigation = {};
+    const VALID_STYLES = ['gold', 'neon', 'editorial', 'glass'];
+    const mt = this.config.navigation.menuTitle;
+    if (!mt || typeof mt !== 'object') {
+      this.config.navigation.menuTitle = { enabled: true, style: 'gold' };
+    } else {
+      if (typeof mt.enabled !== 'boolean') mt.enabled = true;
+      if (!VALID_STYLES.includes(mt.style)) mt.style = 'gold';
+    }
+  }
+
   async loadConfig() {
     try {
       const response = await fetch('/api/admin/config');
       if (!response.ok) throw new Error('Failed to load config');
       this.config = await response.json();
       this.ensureHeroSection();
+      this.ensureKaraokeNav();
+      this.ensureMenuTitle();
     } catch (error) {
       console.error('Error loading config:', error);
       this.showToast('Failed to load configuration', 'error');
@@ -136,6 +171,24 @@ class AdminPanel {
     });
 
     document.getElementById('save-nav')?.addEventListener('click', () => this.saveConfig());
+
+    // Hero "MENU" title on/off (Navigation tab)
+    document.getElementById('toggle-menu-title')?.addEventListener('change', (e) => {
+      if (!this.config) return;
+      if (!this.config.navigation) this.config.navigation = {};
+      if (!this.config.navigation.menuTitle) this.config.navigation.menuTitle = {};
+      this.config.navigation.menuTitle.enabled = e.target.checked;
+      this.markDirty();
+    });
+
+    // Hero "MENU" title visual style (Navigation tab)
+    document.getElementById('menu-title-style')?.addEventListener('change', (e) => {
+      if (!this.config) return;
+      if (!this.config.navigation) this.config.navigation = {};
+      if (!this.config.navigation.menuTitle) this.config.navigation.menuTitle = {};
+      this.config.navigation.menuTitle.style = e.target.value;
+      this.markDirty();
+    });
 
     document.getElementById('btn-upload')?.addEventListener('click', () => {
       document.getElementById('image-upload').click();
@@ -266,6 +319,7 @@ class AdminPanel {
           <div class="flex-1 space-y-3">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">${langFields(btn)}</div>
             <div><label class="text-xs text-white/50">Target Section ID</label><input type="text" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" value="${btn.target}" data-field="target"></div>
+            <div><label class="text-xs text-white/50">External Link (opens in a new window)</label><input type="url" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" value="${btn.link || ''}" data-field="link" placeholder="https://..."></div>
           </div>
           <span class="text-xs text-white/40 px-2 py-1 bg-white/5 rounded flex-shrink-0">${btn.id.toUpperCase()}</span>
         </div>
@@ -281,8 +335,9 @@ class AdminPanel {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">${langFields(btn)}</div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div><label class="text-xs text-white/50">Target Section ID</label><input type="text" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" value="${btn.target}" data-field="target"></div>
-              <div><label class="text-xs text-white/50">Icon</label><select class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" data-field="icon"><option value="utensils" ${btn.icon === 'utensils' ? 'selected' : ''}>Utensils (Food)</option><option value="martini" ${btn.icon === 'martini' ? 'selected' : ''}>Martini (Drinks)</option><option value="flame" ${btn.icon === 'flame' ? 'selected' : ''}>Flame (Promo)</option><option value="cake" ${btn.icon === 'cake' ? 'selected' : ''}>Cake (Birthday)</option></select></div>
+              <div><label class="text-xs text-white/50">Icon</label><select class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" data-field="icon"><option value="utensils" ${btn.icon === 'utensils' ? 'selected' : ''}>Utensils (Food)</option><option value="martini" ${btn.icon === 'martini' ? 'selected' : ''}>Martini (Drinks)</option><option value="flame" ${btn.icon === 'flame' ? 'selected' : ''}>Flame (Promo)</option><option value="cake" ${btn.icon === 'cake' ? 'selected' : ''}>Cake (Birthday)</option><option value="mic" ${btn.icon === 'mic' ? 'selected' : ''}>Microphone (Karaoke)</option></select></div>
             </div>
+            <div><label class="text-xs text-white/50">External Link (opens in a new window)</label><input type="url" class="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent" value="${btn.link || ''}" data-field="link" placeholder="https://..."></div>
           </div>
           <span class="text-xs text-white/40 px-2 py-1 bg-white/5 rounded flex-shrink-0">${btn.id.toUpperCase()}</span>
         </div>
@@ -292,6 +347,18 @@ class AdminPanel {
     document.querySelectorAll('.nav-btn-item input, .nav-btn-item select').forEach(input => {
       input.addEventListener('change', (e) => this.updateNavButton(e));
     });
+
+    // Reflect the saved "MENU" title state in the toggle (defaults to ON).
+    const menuTitleToggle = document.getElementById('toggle-menu-title');
+    if (menuTitleToggle) {
+      menuTitleToggle.checked = this.config.navigation?.menuTitle?.enabled !== false;
+    }
+
+    // Reflect the saved "MENU" title style in the select (defaults to "gold").
+    const menuTitleStyle = document.getElementById('menu-title-style');
+    if (menuTitleStyle) {
+      menuTitleStyle.value = this.config.navigation?.menuTitle?.style || 'gold';
+    }
 
     this.initSortableJS(document.getElementById('horizontal-nav-list'), 'horizontal');
     this.initSortableJS(document.getElementById('vertical-nav-list'), 'vertical');

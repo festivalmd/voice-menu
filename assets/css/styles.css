@@ -296,6 +296,7 @@ html, body {
 .hero-nav-btn:nth-child(2) { animation-delay: 0.2s; }
 .hero-nav-btn:nth-child(3) { animation-delay: 0.3s; }
 .hero-nav-btn:nth-child(4) { animation-delay: 0.4s; }
+.hero-nav-btn:nth-child(5) { animation-delay: 0.5s; }
 
 @keyframes heroBtnFadeIn {
   from {
@@ -311,6 +312,175 @@ html, body {
 .hero-nav-btn:focus-visible {
   outline: 2px solid #e94560;
   outline-offset: 2px;
+}
+
+/* ============================================================
+   Hero MENU Title - large heading above all hero buttons
+   Shared base + 4 selectable styles (config: navigation.menuTitle.style)
+   Styles are added as classes on the <h1>: menu-style-gold | -neon |
+   -editorial | -glass
+   ============================================================ */
+.hero-menu-title {
+  margin: 0 0 clamp(1.25rem, 4vw, 2.25rem);
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.32em;
+  /* Compensate the trailing letter-spacing so the word looks optically centered */
+  padding-left: 0.32em;
+  text-transform: uppercase;
+  color: #ffffff;
+  /* Reveal animation is GPU-only (opacity + transform); letter-spacing animates on
+     the compositor-friendly text layer. Runs once, then holds the final state. */
+  opacity: 0;
+  will-change: opacity, transform;
+  animation: menuHeroReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Entrance: fade in + gentle rise + tighter tracking. Uses opacity/transform
+   only so the browser can keep it off the main thread. */
+@keyframes menuHeroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    letter-spacing: 0.45em;
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    letter-spacing: 0.32em;
+  }
+}
+
+/* ---------- 1. GOLD - "Золотой блик (Шампань)" ---------- */
+/* Noble champagne gradient with a very slow (once / 5s) passing highlight. */
+.menu-style-gold {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #d8c3a5;
+  text-shadow: 0 1px 10px rgba(212, 175, 55, 0.28);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .menu-style-gold {
+    background-image: linear-gradient(
+      100deg,
+      #d8c3a5 0%,
+      #fff9eb 42%,
+      #d4af37 58%,
+      #d8c3a5 100%
+    );
+    background-size: 250% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    /* Entrance runs once; the slow sheen loops with a 5s period. */
+    animation:
+      menuHeroReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+      menuGoldSheen 5s ease-in-out 0.85s infinite;
+  }
+}
+
+@keyframes menuGoldSheen {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* ---------- 2. NEON - "Клубный неон" ---------- */
+/* Crisp white text with a soft crimson-ruby glow in #e94560 + slow breathing. */
+.menu-style-neon {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #ffffff;
+  text-shadow:
+    0 0 6px rgba(233, 69, 96, 0.75),
+    0 0 16px rgba(233, 69, 96, 0.55),
+    0 0 34px rgba(233, 69, 96, 0.35);
+  animation:
+    menuHeroReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    menuNeonBreath 3.6s ease-in-out 0.85s infinite;
+}
+
+@keyframes menuNeonBreath {
+  0%, 100% {
+    text-shadow:
+      0 0 6px rgba(233, 69, 96, 0.65),
+      0 0 14px rgba(233, 69, 96, 0.45),
+      0 0 28px rgba(233, 69, 96, 0.28);
+  }
+  50% {
+    text-shadow:
+      0 0 8px rgba(233, 69, 96, 0.9),
+      0 0 22px rgba(233, 69, 96, 0.7),
+      0 0 46px rgba(233, 69, 96, 0.45);
+  }
+}
+
+/* ---------- 3. EDITORIAL - "Минимализм с линиями" ---------- */
+/* Cinzel, cream white, no looping animation - only the entrance reveal.
+   Thin decorative rules on both sides via ::before / ::after. */
+.menu-style-editorial {
+  position: relative;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  color: #f8f5f0;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  /* Only the shared entrance animation; nothing loops. */
+  animation: menuHeroReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.menu-style-editorial::before,
+.menu-style-editorial::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: clamp(1.5rem, 8vw, 4rem);
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(248, 245, 240, 0.6));
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.menu-style-editorial::before {
+  left: 0;
+  background: linear-gradient(to left, transparent, rgba(248, 245, 240, 0.6));
+}
+
+.menu-style-editorial::after {
+  right: 0;
+}
+
+/* ---------- 4. GLASS - "Хром / Серебро" ---------- */
+/* Platinum-silver metallic gradient with a crisp, deep shadow. */
+.menu-style-glass {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: #c9cdd4;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.65), 0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .menu-style-glass {
+    background-image: linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #dfe3e8 32%,
+      #9aa1ab 50%,
+      #6f7681 62%,
+      #eef1f5 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    text-shadow: none;
+    /* Crisp deep shadow via filter so it survives the transparent text fill. */
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.7)) drop-shadow(0 8px 20px rgba(0, 0, 0, 0.45));
+    animation: menuHeroReveal 0.85s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
 }
 
 /* Hero Icons */
@@ -418,7 +588,26 @@ html, body {
     opacity: 1;
     transform: none;
   }
-  
+
+  /* Hero MENU title: keep it visible, just drop the entrance/sheen/glow/breath */
+  .hero-menu-title,
+  .menu-style-gold,
+  .menu-style-neon,
+  .menu-style-editorial,
+  .menu-style-glass {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+    letter-spacing: 0.32em;
+  }
+
+  /* The neon glow relies on text-shadow, not an animation - keep it but static. */
+  .menu-style-gold,
+  .menu-style-neon,
+  .menu-style-glass {
+    filter: none;
+  }
+
   .promo-text {
     animation: none;
   }

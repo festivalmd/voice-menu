@@ -77,6 +77,30 @@
 
     <!-- Navigation Tab -->
     <div id="tab-content-navigation" class="tab-content active space-y-6">
+      <!-- Hero MENU Title -->
+      <section class="bg-white/5 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold flex items-center gap-2">
+            <svg class="w-5 h-5 text-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7V5h16v2M9 20h6M12 5v15"/></svg>
+            Hero MENU Title
+          </h2>
+        </div>
+        <label class="flex items-center gap-3 cursor-pointer select-none">
+          <input type="checkbox" id="toggle-menu-title" class="w-5 h-5 accent-accent rounded border-white/20 bg-white/5">
+          <span class="text-sm text-white/80">Show the big "MENU" title above the hero buttons</span>
+        </label>
+        <div class="mt-4">
+          <label for="menu-title-style" class="block text-xs text-white/50 mb-1">Title style</label>
+          <select id="menu-title-style" class="w-full md:w-72 bg-white/5 border border-white/10 rounded px-3 py-2 text-white text-sm focus:outline-none focus:border-accent">
+            <option value="gold">Gold shimmer (Champagne)</option>
+            <option value="neon">Club neon (Ruby glow)</option>
+            <option value="editorial">Minimal with lines (Cinzel)</option>
+            <option value="glass">Chrome / Silver</option>
+          </select>
+        </div>
+        <p class="text-xs text-white/40 mt-2">The title is always displayed as "MENU" (all languages).</p>
+      </section>
+
       <!-- Horizontal Navigation -->
       <section class="bg-white/5 rounded-xl p-6">
         <div class="flex items-center justify-between mb-6">
