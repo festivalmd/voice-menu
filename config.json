@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 9,
   "navigation": {
     "horizontal": [
       {
@@ -94,7 +94,86 @@
           "id": "food-section-1794937300590-x0qcwv",
           "src": "/api/images/menu/food-section/1794937300430-115e45ee.jpg",
           "alt": "food-page-2",
-          "prices": []
+          "prices": [
+            {
+              "id": "zone-1795019196810-zi0yh32vq",
+              "price": "300",
+              "x_percent": 79.3,
+              "y_percent": 25.6
+            },
+            {
+              "id": "zone-1795019285939-t4lzn",
+              "price": "300",
+              "x_percent": 79.5,
+              "y_percent": 37.2
+            },
+            {
+              "id": "zone-1795019296683-6eneb",
+              "price": "150",
+              "x_percent": 79.6,
+              "y_percent": 61.6
+            },
+            {
+              "id": "zone-1795019294260-6fjr6",
+              "price": "150",
+              "x_percent": 79.3,
+              "y_percent": 49
+            }
+          ],
+          "priceZones": [
+            {
+              "id": "zone-1795019196810-zi0yh32vq",
+              "x_percent": 79.3,
+              "y_percent": 25.6,
+              "w_percent": 9.2,
+              "h_percent": 4.2,
+              "text": "300",
+              "fontSize": 20,
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": true
+            },
+            {
+              "id": "zone-1795019285939-t4lzn",
+              "x_percent": 79.5,
+              "y_percent": 37.2,
+              "w_percent": 9.2,
+              "h_percent": 4.2,
+              "text": "300",
+              "fontSize": 20,
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": true
+            },
+            {
+              "id": "zone-1795019296683-6eneb",
+              "x_percent": 79.6,
+              "y_percent": 61.6,
+              "w_percent": 9.2,
+              "h_percent": 4.2,
+              "text": "150",
+              "fontSize": "24",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": true
+            },
+            {
+              "id": "zone-1795019294260-6fjr6",
+              "x_percent": 79.3,
+              "y_percent": 49,
+              "w_percent": 9.2,
+              "h_percent": 4.2,
+              "text": "150",
+              "fontSize": 20,
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": true
+            }
+          ]
         },
         {
           "id": "food-section-1794937301324-m1gefj",
@@ -154,7 +233,29 @@
           "id": "drinks-section-1794937436783-8okg5h",
           "src": "/api/images/menu/drinks-section/1794937436613-4133a071.jpg",
           "alt": "drinks-page-6",
-          "prices": []
+          "prices": [
+            {
+              "id": "zone-1795019689653-sc3idbt1y",
+              "price": "300",
+              "x_percent": 18.7,
+              "y_percent": 23.4
+            }
+          ],
+          "priceZones": [
+            {
+              "id": "zone-1795019689653-sc3idbt1y",
+              "x_percent": 18.7,
+              "y_percent": 23.4,
+              "w_percent": 12.7,
+              "h_percent": 6.1,
+              "text": "300",
+              "fontSize": "24",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": true
+            }
+          ]
         },
         {
           "id": "drinks-section-1794937437251-c4xvtn",
@@ -170,37 +271,37 @@
             {
               "id": "zone-1794943714237-t8uy9sb7a",
               "price": "170/4250",
-              "x_percent": 52.7,
-              "y_percent": 12.2
+              "x_percent": 52.8,
+              "y_percent": 12.4
             },
             {
               "id": "zone-1794943809438-0ljfo",
               "price": "75/1875",
-              "x_percent": 53.3,
-              "y_percent": 14.2
+              "x_percent": 53.7,
+              "y_percent": 14.3
             },
             {
               "id": "zone-1794943872350-tgdz7",
               "price": "210/3675",
               "x_percent": 53.1,
-              "y_percent": 16
+              "y_percent": 16.1
             },
             {
               "id": "zone-1794943960807-uyh08",
               "price": "90/2250",
-              "x_percent": 54.5,
+              "x_percent": 54.1,
               "y_percent": 21.9
             },
             {
               "id": "zone-1794943979098-13vck",
               "price": "85/2125",
-              "x_percent": 54.8,
-              "y_percent": 23.7
+              "x_percent": 54.1,
+              "y_percent": 23.8
             },
             {
               "id": "zone-1794944041564-85ipm",
               "price": "85/2125",
-              "x_percent": 53.7,
+              "x_percent": 53.6,
               "y_percent": 29.5
             },
             {
@@ -212,7 +313,7 @@
             {
               "id": "zone-1794944239901-h0o8x",
               "price": "80/2000",
-              "x_percent": 53.6,
+              "x_percent": 53.7,
               "y_percent": 41.6
             },
             {
@@ -224,13 +325,13 @@
             {
               "id": "zone-1794944251985-au1zx",
               "price": "75/1875",
-              "x_percent": 53.6,
+              "x_percent": 53.3,
               "y_percent": 58.7
             },
             {
               "id": "zone-1794944355632-vbrx4",
               "price": "75/1875",
-              "x_percent": 53.3,
+              "x_percent": 53.4,
               "y_percent": 67
             },
             {
@@ -272,15 +373,15 @@
             {
               "id": "zone-1794944352972-84j7f",
               "price": "100/1750",
-              "x_percent": 52.6,
+              "x_percent": 52.7,
               "y_percent": 69
             }
           ],
           "priceZones": [
             {
               "id": "zone-1794943714237-t8uy9sb7a",
-              "x_percent": 52.7,
-              "y_percent": 12.2,
+              "x_percent": 52.8,
+              "y_percent": 12.4,
               "w_percent": 12.7,
               "h_percent": 2.6,
               "text": "170/4250",
@@ -292,8 +393,8 @@
             },
             {
               "id": "zone-1794943809438-0ljfo",
-              "x_percent": 53.3,
-              "y_percent": 14.2,
+              "x_percent": 53.7,
+              "y_percent": 14.3,
               "w_percent": 12.7,
               "h_percent": 2.6,
               "text": "75/1875",
@@ -306,7 +407,7 @@
             {
               "id": "zone-1794943872350-tgdz7",
               "x_percent": 53.1,
-              "y_percent": 16,
+              "y_percent": 16.1,
               "w_percent": 12.7,
               "h_percent": 2.6,
               "text": "210/3675",
@@ -318,7 +419,7 @@
             },
             {
               "id": "zone-1794943960807-uyh08",
-              "x_percent": 54.5,
+              "x_percent": 54.1,
               "y_percent": 21.9,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -331,8 +432,8 @@
             },
             {
               "id": "zone-1794943979098-13vck",
-              "x_percent": 54.8,
-              "y_percent": 23.7,
+              "x_percent": 54.1,
+              "y_percent": 23.8,
               "w_percent": 12.7,
               "h_percent": 2.6,
               "text": "85/2125",
@@ -344,7 +445,7 @@
             },
             {
               "id": "zone-1794944041564-85ipm",
-              "x_percent": 53.7,
+              "x_percent": 53.6,
               "y_percent": 29.5,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -370,7 +471,7 @@
             },
             {
               "id": "zone-1794944239901-h0o8x",
-              "x_percent": 53.6,
+              "x_percent": 53.7,
               "y_percent": 41.6,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -396,7 +497,7 @@
             },
             {
               "id": "zone-1794944251985-au1zx",
-              "x_percent": 53.6,
+              "x_percent": 53.3,
               "y_percent": 58.7,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -409,7 +510,7 @@
             },
             {
               "id": "zone-1794944355632-vbrx4",
-              "x_percent": 53.3,
+              "x_percent": 53.4,
               "y_percent": 67,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -500,7 +601,7 @@
             },
             {
               "id": "zone-1794944352972-84j7f",
-              "x_percent": 52.6,
+              "x_percent": 52.7,
               "y_percent": 69,
               "w_percent": 12.7,
               "h_percent": 2.6,
@@ -517,18 +618,1059 @@
           "id": "drinks-section-1794943538573-i7llhf",
           "src": "/api/images/menu/drinks-section/1794943538772-efd369a3.jpg",
           "alt": "drinks-page-9",
-          "prices": []
+          "prices": [
+            {
+              "id": "zone-1794947288387-51h6sgibn",
+              "price": "115/1437",
+              "x_percent": 77.2,
+              "y_percent": 8.8
+            },
+            {
+              "id": "zone-1794947331635-pnpp6",
+              "price": "75/1875",
+              "x_percent": 78.1,
+              "y_percent": 10.8
+            },
+            {
+              "id": "zone-1794947386589-w2slc",
+              "price": "75/1875",
+              "x_percent": 78,
+              "y_percent": 12.6
+            },
+            {
+              "id": "zone-1794947413668-k8b7w",
+              "price": "2400",
+              "x_percent": 79.8,
+              "y_percent": 22.2
+            },
+            {
+              "id": "zone-1794947452308-hmy4s",
+              "price": "670",
+              "x_percent": 80.5,
+              "y_percent": 24.2
+            },
+            {
+              "id": "zone-1794947491956-evdac",
+              "price": "300",
+              "x_percent": 80.6,
+              "y_percent": 26
+            },
+            {
+              "id": "zone-1794947499294-7sa7f",
+              "price": "300",
+              "x_percent": 80.6,
+              "y_percent": 28.1
+            },
+            {
+              "id": "zone-1794947514678-uzkuq",
+              "price": "310",
+              "x_percent": 80.5,
+              "y_percent": 30.1
+            },
+            {
+              "id": "zone-1794947522257-xahoz",
+              "price": "310",
+              "x_percent": 80.5,
+              "y_percent": 32
+            },
+            {
+              "id": "zone-1794947526220-cnobc",
+              "price": "350",
+              "x_percent": 80.5,
+              "y_percent": 34.2
+            },
+            {
+              "id": "zone-1794947601354-pmadc",
+              "price": "400",
+              "x_percent": 80.1,
+              "y_percent": 43.9
+            },
+            {
+              "id": "zone-1794947606356-wtbuc",
+              "price": "400",
+              "x_percent": 80.3,
+              "y_percent": 45.8
+            },
+            {
+              "id": "zone-1794947614594-9mzfr",
+              "price": "400",
+              "x_percent": 80.3,
+              "y_percent": 47.7
+            },
+            {
+              "id": "zone-1794947620481-i97nb",
+              "price": "900",
+              "x_percent": 80.3,
+              "y_percent": 49.7
+            },
+            {
+              "id": "zone-1794947629888-fayh3",
+              "price": "790",
+              "x_percent": 80.3,
+              "y_percent": 51.6
+            },
+            {
+              "id": "zone-1794947641403-a85q7",
+              "price": "790",
+              "x_percent": 80.3,
+              "y_percent": 53.7
+            },
+            {
+              "id": "zone-1794947766767-0csca",
+              "price": "135/3375",
+              "x_percent": 77.2,
+              "y_percent": 63.5
+            },
+            {
+              "id": "zone-1794948082029-xmf8y",
+              "price": "115/2156",
+              "x_percent": 76.5,
+              "y_percent": 81.5
+            },
+            {
+              "id": "zone-1794948205295-55uyk",
+              "price": "75/1875",
+              "x_percent": 77.3,
+              "y_percent": 83.5
+            },
+            {
+              "id": "zone-1794947821066-g1rhw",
+              "price": "80/1000",
+              "x_percent": 78.2,
+              "y_percent": 65.6
+            },
+            {
+              "id": "zone-1794947864252-hej3a",
+              "price": "75/937",
+              "x_percent": 78.6,
+              "y_percent": 67.4
+            },
+            {
+              "id": "zone-1794947908874-w1zw8",
+              "price": "70/875",
+              "x_percent": 78.6,
+              "y_percent": 69.4
+            },
+            {
+              "id": "zone-1794947915966-ssdee",
+              "price": "50/685",
+              "x_percent": 78.7,
+              "y_percent": 71.3
+            },
+            {
+              "id": "zone-1794948172338-ezo4p",
+              "price": "70/875",
+              "x_percent": 78.1,
+              "y_percent": 85.4
+            },
+            {
+              "id": "zone-1794948270936-t3mgh",
+              "price": "50/1250",
+              "x_percent": 77.4,
+              "y_percent": 87.4
+            },
+            {
+              "id": "zone-1794948274824-i2002",
+              "price": "50/875",
+              "x_percent": 78.1,
+              "y_percent": 89.4
+            }
+          ],
+          "priceZones": [
+            {
+              "id": "zone-1794947288387-51h6sgibn",
+              "x_percent": 77.2,
+              "y_percent": 8.8,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "115/1437",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947331635-pnpp6",
+              "x_percent": 78.1,
+              "y_percent": 10.8,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "75/1875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947386589-w2slc",
+              "x_percent": 78,
+              "y_percent": 12.6,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "75/1875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947413668-k8b7w",
+              "x_percent": 79.8,
+              "y_percent": 22.2,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "2400",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947452308-hmy4s",
+              "x_percent": 80.5,
+              "y_percent": 24.2,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "670",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947491956-evdac",
+              "x_percent": 80.6,
+              "y_percent": 26,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "300",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947499294-7sa7f",
+              "x_percent": 80.6,
+              "y_percent": 28.1,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "300",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947514678-uzkuq",
+              "x_percent": 80.5,
+              "y_percent": 30.1,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "310",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947522257-xahoz",
+              "x_percent": 80.5,
+              "y_percent": 32,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "310",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947526220-cnobc",
+              "x_percent": 80.5,
+              "y_percent": 34.2,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "350",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947601354-pmadc",
+              "x_percent": 80.1,
+              "y_percent": 43.9,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "400",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947606356-wtbuc",
+              "x_percent": 80.3,
+              "y_percent": 45.8,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "400",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947614594-9mzfr",
+              "x_percent": 80.3,
+              "y_percent": 47.7,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "400",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947620481-i97nb",
+              "x_percent": 80.3,
+              "y_percent": 49.7,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "900",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947629888-fayh3",
+              "x_percent": 80.3,
+              "y_percent": 51.6,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "790",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947641403-a85q7",
+              "x_percent": 80.3,
+              "y_percent": 53.7,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "790",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947766767-0csca",
+              "x_percent": 77.2,
+              "y_percent": 63.5,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "135/3375",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948082029-xmf8y",
+              "x_percent": 76.5,
+              "y_percent": 81.5,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "115/2156",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948205295-55uyk",
+              "x_percent": 77.3,
+              "y_percent": 83.5,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "75/1875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947821066-g1rhw",
+              "x_percent": 78.2,
+              "y_percent": 65.6,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "80/1000",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947864252-hej3a",
+              "x_percent": 78.6,
+              "y_percent": 67.4,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "75/937",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947908874-w1zw8",
+              "x_percent": 78.6,
+              "y_percent": 69.4,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "70/875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794947915966-ssdee",
+              "x_percent": 78.7,
+              "y_percent": 71.3,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "50/685",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948172338-ezo4p",
+              "x_percent": 78.1,
+              "y_percent": 85.4,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "70/875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948270936-t3mgh",
+              "x_percent": 77.4,
+              "y_percent": 87.4,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "50/1250",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948274824-i2002",
+              "x_percent": 78.1,
+              "y_percent": 89.4,
+              "w_percent": 11.4,
+              "h_percent": 2.6,
+              "text": "50/875",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            }
+          ]
         },
         {
           "id": "drinks-section-1794943539058-qfjsb2",
           "src": "/api/images/menu/drinks-section/1794943539203-3d836d59.jpg",
           "alt": "drinks-page-10",
-          "prices": []
+          "prices": [
+            {
+              "id": "zone-1794948425427-cdg1tw9x5",
+              "price": "85",
+              "x_percent": 60.1,
+              "y_percent": 16.1
+            },
+            {
+              "id": "zone-1794948480169-8xux7",
+              "price": "85",
+              "x_percent": 60.1,
+              "y_percent": 18
+            },
+            {
+              "id": "zone-1794948486254-cyk73",
+              "price": "80",
+              "x_percent": 60,
+              "y_percent": 20
+            },
+            {
+              "id": "zone-1794948527171-rvk73",
+              "price": "90",
+              "x_percent": 60,
+              "y_percent": 29.7
+            },
+            {
+              "id": "zone-1794948629491-wwz6z",
+              "price": "35",
+              "x_percent": 60,
+              "y_percent": 58.2
+            },
+            {
+              "id": "zone-1794948692489-lrknk",
+              "price": "75",
+              "x_percent": 60.1,
+              "y_percent": 60.2
+            },
+            {
+              "id": "zone-1794948693929-v5963",
+              "price": "39",
+              "x_percent": 60,
+              "y_percent": 62.1
+            },
+            {
+              "id": "zone-1794948712209-35b06",
+              "price": "39",
+              "x_percent": 60.1,
+              "y_percent": 64.2
+            },
+            {
+              "id": "zone-1794948721467-v0nap",
+              "price": "150",
+              "x_percent": 59.6,
+              "y_percent": 66
+            },
+            {
+              "id": "zone-1794948729637-yt6d8",
+              "price": "85",
+              "x_percent": 60.2,
+              "y_percent": 67.8
+            },
+            {
+              "id": "zone-1794948744361-ty94u",
+              "price": "35",
+              "x_percent": 60,
+              "y_percent": 77.9
+            },
+            {
+              "id": "zone-1794948754503-0ibds",
+              "price": "45",
+              "x_percent": 60,
+              "y_percent": 79.8
+            },
+            {
+              "id": "zone-1794948760429-gg8mn",
+              "price": "45",
+              "x_percent": 60,
+              "y_percent": 81.7
+            },
+            {
+              "id": "zone-1794948767915-e3mu5",
+              "price": "100",
+              "x_percent": 59.4,
+              "y_percent": 83.8
+            },
+            {
+              "id": "zone-1794948772901-0ntow",
+              "price": "70",
+              "x_percent": 60.1,
+              "y_percent": 85.7
+            },
+            {
+              "id": "zone-1794948779451-appxx",
+              "price": "70",
+              "x_percent": 60,
+              "y_percent": 87.7
+            },
+            {
+              "id": "zone-1794948559108-awas9",
+              "price": "160",
+              "x_percent": 59.2,
+              "y_percent": 36.2
+            },
+            {
+              "id": "zone-1794948598919-l3z08",
+              "price": "100",
+              "x_percent": 59.2,
+              "y_percent": 56.4
+            }
+          ],
+          "priceZones": [
+            {
+              "id": "zone-1794948425427-cdg1tw9x5",
+              "x_percent": 60.1,
+              "y_percent": 16.1,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "85",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948480169-8xux7",
+              "x_percent": 60.1,
+              "y_percent": 18,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "85",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948486254-cyk73",
+              "x_percent": 60,
+              "y_percent": 20,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "80",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948527171-rvk73",
+              "x_percent": 60,
+              "y_percent": 29.7,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "90",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948629491-wwz6z",
+              "x_percent": 60,
+              "y_percent": 58.2,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "35",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948692489-lrknk",
+              "x_percent": 60.1,
+              "y_percent": 60.2,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "75",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948693929-v5963",
+              "x_percent": 60,
+              "y_percent": 62.1,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "39",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948712209-35b06",
+              "x_percent": 60.1,
+              "y_percent": 64.2,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "39",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948721467-v0nap",
+              "x_percent": 59.6,
+              "y_percent": 66,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "150",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948729637-yt6d8",
+              "x_percent": 60.2,
+              "y_percent": 67.8,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "85",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948744361-ty94u",
+              "x_percent": 60,
+              "y_percent": 77.9,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "35",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948754503-0ibds",
+              "x_percent": 60,
+              "y_percent": 79.8,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "45",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948760429-gg8mn",
+              "x_percent": 60,
+              "y_percent": 81.7,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "45",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948767915-e3mu5",
+              "x_percent": 59.4,
+              "y_percent": 83.8,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "100",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948772901-0ntow",
+              "x_percent": 60.1,
+              "y_percent": 85.7,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "70",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948779451-appxx",
+              "x_percent": 60,
+              "y_percent": 87.7,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "70",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948559108-awas9",
+              "x_percent": 59.2,
+              "y_percent": 36.2,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "160",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948598919-l3z08",
+              "x_percent": 59.2,
+              "y_percent": 56.4,
+              "w_percent": 7.1,
+              "h_percent": 2.3,
+              "text": "100",
+              "fontSize": "14",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            }
+          ]
         },
         {
           "id": "drinks-section-1794943539531-55neiw",
           "src": "/api/images/menu/drinks-section/1794943539669-290883c1.jpg",
           "alt": "drinks-page-11",
+          "prices": [
+            {
+              "id": "zone-1794948951388-2he3qqmh8",
+              "price": "300",
+              "x_percent": 85.8,
+              "y_percent": 13.3
+            },
+            {
+              "id": "zone-1794948976156-w6ks3",
+              "price": "300",
+              "x_percent": 85.9,
+              "y_percent": 15.7
+            },
+            {
+              "id": "zone-1794949035996-zqgxe",
+              "price": "1000",
+              "x_percent": 86.3,
+              "y_percent": 46
+            },
+            {
+              "id": "zone-1794949262257-n63ww",
+              "price": "100",
+              "x_percent": 86.6,
+              "y_percent": 31.1
+            },
+            {
+              "id": "zone-1794949244155-ak63k",
+              "price": "1000",
+              "x_percent": 86,
+              "y_percent": 33.3
+            },
+            {
+              "id": "zone-1794949067534-yqqqy",
+              "price": "200",
+              "x_percent": 87,
+              "y_percent": 41.9
+            },
+            {
+              "id": "zone-1794949090884-d5rbu",
+              "price": "50",
+              "x_percent": 87.6,
+              "y_percent": 39.7
+            },
+            {
+              "id": "zone-1794949167626-0svka",
+              "price": "5000",
+              "x_percent": 86.1,
+              "y_percent": 37.6
+            },
+            {
+              "id": "zone-1794949215304-xzw2u",
+              "price": "300",
+              "x_percent": 86.8,
+              "y_percent": 35.3
+            },
+            {
+              "id": "zone-1794949326532-6pcy9zat1",
+              "price": "100/150",
+              "x_percent": 82.3,
+              "y_percent": 28.8
+            }
+          ],
+          "priceZones": [
+            {
+              "id": "zone-1794948951388-2he3qqmh8",
+              "x_percent": 85.8,
+              "y_percent": 13.3,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "300",
+              "fontSize": 20,
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794948976156-w6ks3",
+              "x_percent": 85.9,
+              "y_percent": 15.7,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "300",
+              "fontSize": 20,
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949035996-zqgxe",
+              "x_percent": 86.3,
+              "y_percent": 46,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "1000",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949262257-n63ww",
+              "x_percent": 86.6,
+              "y_percent": 31.1,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "100",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949244155-ak63k",
+              "x_percent": 86,
+              "y_percent": 33.3,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "1000",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949067534-yqqqy",
+              "x_percent": 87,
+              "y_percent": 41.9,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "200",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949090884-d5rbu",
+              "x_percent": 87.6,
+              "y_percent": 39.7,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "50",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949167626-0svka",
+              "x_percent": 86.1,
+              "y_percent": 37.6,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "5000",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949215304-xzw2u",
+              "x_percent": 86.8,
+              "y_percent": 35.3,
+              "w_percent": 9.2,
+              "h_percent": 2.5,
+              "text": "300",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            },
+            {
+              "id": "zone-1794949326532-6pcy9zat1",
+              "x_percent": 82.3,
+              "y_percent": 28.8,
+              "w_percent": 12,
+              "h_percent": 2.8,
+              "text": "100/150",
+              "fontSize": "16",
+              "color": "#000000",
+              "backgroundColor": "transparent",
+              "textShadow": false,
+              "bold": false
+            }
+          ]
+        },
+        {
+          "id": "drinks-section-1794969780818-bk4j0v",
+          "src": "/api/images/menu/drinks-section/1794969780773-c9f4a1d4.jpg",
+          "alt": "image_ed78e0ce",
           "prices": []
         }
       ]
@@ -538,9 +1680,63 @@
       "titleKey": "promo.title",
       "images": [
         {
-          "id": "promo-modal-1794927117845-22ocjq",
-          "src": "/api/images/menu/promo-modal/1794927118323-8685ebd4.jpg",
-          "alt": "Voice buklet_page-0002",
+          "id": "promo-modal-1794967330274-qcbws4",
+          "src": "/api/images/menu/promo-modal/1794967330113-98e66e63.jpg",
+          "alt": "set-1",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967330889-r611e5",
+          "src": "/api/images/menu/promo-modal/1794967330611-48df1fe1.jpg",
+          "alt": "set1_1",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967331460-9y3ni3",
+          "src": "/api/images/menu/promo-modal/1794967331270-3d1cf9a3.jpg",
+          "alt": "set-2",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967331840-il7tuo",
+          "src": "/api/images/menu/promo-modal/1794967331709-b750ab71.jpg",
+          "alt": "set-2-2",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967332217-h66z95",
+          "src": "/api/images/menu/promo-modal/1794967332076-6c982596.jpg",
+          "alt": "set3",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967332570-b62sya",
+          "src": "/api/images/menu/promo-modal/1794967332440-80cbf72b.jpg",
+          "alt": "set4",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967333253-gpo2s9",
+          "src": "/api/images/menu/promo-modal/1794967332823-088eefa8.jpg",
+          "alt": "set4-4",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967333639-1tcwk9",
+          "src": "/api/images/menu/promo-modal/1794967333474-a491b56a.jpg",
+          "alt": "set5",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1794967334008-wal508",
+          "src": "/api/images/menu/promo-modal/1794967333870-3749a23b.jpg",
+          "alt": "set5-5",
+          "prices": []
+        },
+        {
+          "id": "promo-modal-1795002404136-sdpnra",
+          "src": "/api/images/menu/promo-modal/1795002404033-de0b082e.jpg",
+          "alt": "set_aperitiv",
           "prices": []
         }
       ]
@@ -550,13 +1746,31 @@
       "titleKey": "birthday.title",
       "images": [
         {
-          "id": "birthday-modal-1794927090292-dgwi0y",
-          "src": "/api/images/menu/birthday-modal/1794927090700-8b0fbd8a.jpg",
-          "alt": "Voice buklet_page-0001",
+          "id": "birthday-modal-1794967437593-7wbr5j",
+          "src": "/api/images/menu/birthday-modal/1794967437450-397365fd.jpg",
+          "alt": "bday_rus4200",
+          "prices": []
+        },
+        {
+          "id": "birthday-modal-1794967438697-k0b7tp",
+          "src": "/api/images/menu/birthday-modal/1794967438565-b07092ed.jpg",
+          "alt": "zi_de_nastere4200",
+          "prices": []
+        },
+        {
+          "id": "birthday-modal-1794967438072-byvkr8",
+          "src": "/api/images/menu/birthday-modal/1794967437869-f0e942b5.jpg",
+          "alt": "bday_rus4200_2",
+          "prices": []
+        },
+        {
+          "id": "birthday-modal-1794967439095-d9svh6",
+          "src": "/api/images/menu/birthday-modal/1794967438966-181e50d8.jpg",
+          "alt": "zi_de_nastere4200_2",
           "prices": []
         }
       ]
     }
   ],
-  "updatedAt": "2026-11-17T19:45:11.878Z"
+  "updatedAt": "2026-11-18T16:36:32.032Z"
 }

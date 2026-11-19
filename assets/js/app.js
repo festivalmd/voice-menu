@@ -3,6 +3,28 @@
  * Handles navigation, smooth scroll, modals, language switching, and dynamic config rendering
  */
 
+/**
+ * Arrow hint timing. The pulse animation (CSS `--modal-hint-cycle`) runs exactly
+ * 3 iterations, so the hint must stay visible for exactly `3 * cycle` ms -
+ * anything shorter cuts the animation mid-cycle (the "abrupt cut" glitch).
+ * Keep these two numbers in sync with `--modal-hint-cycle` in styles.css.
+ */
+const MODAL_HINT_CYCLE_MS = 1600;
+const MODAL_HINT_CYCLES = 3;
+const MODAL_HINT_DURATION_MS = MODAL_HINT_CYCLE_MS * MODAL_HINT_CYCLES; // 4800ms
+/** Small grace so the 3rd cycle (and the nudge) is guaranteed to have finished. */
+const MODAL_HINT_GRACE_MS = 80;
+/**
+ * Pause between two consecutive hints while the modal is open and idle. The hint
+ * shows for MODAL_HINT_DURATION_MS, disappears, stays hidden for this long and
+ * then shows again - repeating forever until the guest scrolls/swipes, taps an
+ * arrow, or closes the modal (all of which reset the whole cycle).
+ */
+const MODAL_HINT_GAP_MS = 5000;
+/** A tap must stay inside these bounds to count as a slide switch (not a swipe). */
+const MODAL_EDGE_TAP_MAX_MOVE_PX = 10;
+const MODAL_EDGE_TAP_MAX_TIME_MS = 400;
+
 class BarMenuApp {
   constructor() {
     this.header = document.getElementById('main-header');
@@ -15,6 +37,8 @@ class BarMenuApp {
     this.headerVisible = false;
     this.ticking = false;
     this.config = null;
+    /** Timestamp until which a programmatic smooth scroll may still be running. */
+    this.smoothScrollUntil = 0;
     // API base URL - in production uses relative, in dev can be overridden via window.MENU_API_BASE
     this.apiBase = window.MENU_API_BASE || '';
     
@@ -37,6 +61,22 @@ class BarMenuApp {
     this.handleHashNavigation();
     this.setupScrollListener();
     this.setupResizeListener();
+
+    // Show the header right away when the page is restored (reload / deep link)
+    // already scrolled past the hero - otherwise it would pop in on the first
+    // scroll event. The hysteresis thresholds are honoured by the same method.
+    this.updateHeaderVisibility();
+
+    // Lazy pictures reveal as they arrive. They have no reserved intrinsic box
+    // before decode, so make sure scroll anchoring can never shift the page when
+    // one of them lands while the guest is dragging.
+    document.querySelectorAll('#main-menu-container img').forEach(img => {
+      if (!img.complete) {
+        const sync = () => this.onScroll();
+        img.addEventListener('load', sync, { passive: true, once: true });
+        img.addEventListener('error', sync, { passive: true, once: true });
+      }
+    });
     
     // Initialize i18n after rendering so translations apply to dynamic content
     if (window.i18n) {
@@ -79,9 +119,18 @@ class BarMenuApp {
     // Horizontal nav (header)
     const horizontalNav = document.getElementById('horizontal-nav');
     if (horizontalNav && this.config?.navigation?.horizontal) {
-      horizontalNav.innerHTML = this.config.navigation.horizontal.map(btn => `
-        <button class="nav-btn shrink-0 md:flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center" data-nav="${btn.id}"${btn.link ? ` data-external-url="${btn.link}"` : ''} data-i18n="${btn.labelKey}">${btn.id.toUpperCase()}</button>
-      `).join('');
+      horizontalNav.innerHTML = this.config.navigation.horizontal.map(btn => {
+        // The promo button keeps the SAME special highlight it has in the hero
+        // (vertical) nav: an animated gradient (`.promo-text` + `bg-clip-text`)
+        // instead of the plain white/hover/active text of the other buttons.
+        const isPromo = btn.id === 'promo';
+        const className = isPromo
+          ? 'nav-btn nav-btn-promo shrink-0 md:flex-1 px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap text-center promo-text text-transparent bg-clip-text bg-gradient-to-r from-accent via-red-500 to-orange-500'
+          : 'nav-btn shrink-0 md:flex-1 px-3 py-2 text-sm font-medium text-white/80 hover:text-white active:text-accent transition-colors whitespace-nowrap text-center';
+        return `
+        <button class="${className}" data-nav="${btn.id}"${btn.link ? ` data-external-url="${btn.link}"` : ''} data-i18n="${btn.labelKey}">${btn.id.toUpperCase()}</button>
+      `;
+      }).join('');
     }
 
     // Vertical nav (hero)
@@ -170,16 +219,57 @@ class BarMenuApp {
         <section id="${section.id}" class="menu-section px-4" aria-labelledby="${section.id}-title">
           <h2 id="${section.id}-title" class="sr-only" data-i18n="${section.titleKey}">${section.id.toUpperCase()}</h2>
           <div class="space-y-4">
-            ${section.images.map(img => `
+            ${section.images.map(img => {
+              // Reserve the picture's box BEFORE it is decoded. A lazy image that
+              // suddenly grows from 0px to Npx while the finger is dragging is
+              // exactly what makes native scrolling stutter / jump, so the
+              // intrinsic ratio (when known) becomes an inline aspect-ratio.
+              const ratio = BarMenuApp.intrinsicRatio(img);
+              const attrs = BarMenuApp.intrinsicAttrs(img, ratio);
+              return `
               <div class="image-wrapper relative">
-                <img src="${img.src}" alt="${img.alt}" class="w-full h-auto rounded-lg shadow-lg" loading="lazy">
+                <img src="${img.src}" alt="${img.alt || ''}"${attrs} class="w-full h-auto rounded-lg shadow-lg" loading="lazy" decoding="async">
                 <div class="price-overlay absolute inset-0 pointer-events-none" data-image-id="${img.id}"></div>
               </div>
-            `).join('')}
+            `;
+            }).join('')}
           </div>
         </section>
       `;
     }).join('');
+  }
+
+  /**
+   * Intrinsic aspect ratio of a config image, if the config recorded it.
+   * Accepts `img.width`/`img.height` or a stored `aspectRatio`; returns '' when
+   * the dimensions are unknown (the browser then simply keeps the natural ratio).
+   */
+  static intrinsicRatio(img) {
+    const w = Number(img?.width);
+    const h = Number(img?.height);
+    if (Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) {
+      return `${w} / ${h}`;
+    }
+    const stored = Number(img?.aspectRatio);
+    if (Number.isFinite(stored) && stored > 0) {
+      return `${stored}`;
+    }
+    return '';
+  }
+
+  /**
+   * Extra `<img>` attributes that reserve the box before decode. Only emitted
+   * when the dimensions are really known, so a broken/empty attribute can never
+   * collapse the image. `width`/`height` give the browser the intrinsic ratio
+   * and `aspect-ratio` locks the height while the file is still loading.
+   */
+  static intrinsicAttrs(img, ratio) {
+    const w = Number(img?.width);
+    const h = Number(img?.height);
+    const hasDims = Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0;
+    const sizeAttrs = hasDims ? ` width="${Math.round(w)}" height="${Math.round(h)}"` : '';
+    const styleAttr = ratio ? ` style="aspect-ratio:${ratio}"` : '';
+    return `${sizeAttrs}${styleAttr}`;
   }
 
   renderModals() {
@@ -232,6 +322,15 @@ class BarMenuApp {
     });
 
     this.updateSliderUI(name, 0);
+
+    // Modal pictures live in a hidden dialog, so the lazy observer from
+    // `renderAllPriceTags()` would never fire for them. Paint their price tags
+    // right away - the overlay is percentage-based, so it stays aligned.
+    if (this.priceDataByImageId) {
+      slider.querySelectorAll('.price-overlay[data-image-id]').forEach(overlay => {
+        this.paintPriceOverlay(overlay);
+      });
+    }
   }
 
   /** Count of slides currently rendered in a modal slider */
@@ -264,10 +363,303 @@ class BarMenuApp {
       // Arrows: hidden on the first/last slide and when there is a single slide.
       btn.classList.toggle('hidden', total <= 1);
       btn.classList.toggle('is-disabled', total <= 1 || (isPrev ? safeIndex === 0 : safeIndex >= total - 1));
+      // An arrow that just became unavailable must stop being hinted at.
+      if (btn.classList.contains('is-disabled')) this.hideArrowHint(name, false);
     });
     if (modal) {
       // Bottom plashka (dots + counter) hidden for a single image.
       modal.classList.toggle('is-single', total <= 1);
+    }
+
+    // Edge tap zones: tappable only in a direction that is still available, so
+    // an edge tap can never fire a no-op scroll at the first/last slide.
+    (modal || document).querySelectorAll(`[data-slider-edge="${name}"]`).forEach(zone => {
+      const isPrev = zone.getAttribute('data-edge-dir') === 'prev';
+      zone.classList.toggle('is-disabled', total <= 1 || (isPrev ? safeIndex <= 0 : safeIndex >= total - 1));
+    });
+
+    this.onSlideIndexChanged(name, safeIndex);
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Arrow swipe-hint
+   *
+   * The arrows are always invisible in the idle state (opacity: 0) so they
+   * never cover the picture. While a modal is open they hint in a REPEATING
+   * cycle so a guest who never touches the slider keeps being reminded:
+   *
+   *      show the arrows for a full 3-cycle hint (4800ms + grace)
+   *        -> fade out -> stay hidden for 5s (MODAL_HINT_GAP_MS)
+   *        -> show again -> ... (forever)
+   *
+   * The cycle starts right after a modal opens (after the 350ms fade-in) and is
+   * restarted (not stopped) whenever a gesture settles, so it keeps running for
+   * as long as the modal stays open. Any scroll / swipe / arrow / dot / edge tap
+   * clears the pending timers and hides the arrows at once; closing the modal
+   * drops the cycle for good.
+   *
+   * The hinted arrows always mirror the directions the guest can actually take
+   * from the current slide: both on a middle slide, right only on the first
+   * slide, left only on the last slide. A single slide is never hinted.
+   * ------------------------------------------------------------------ */
+
+  /** Per-slider hint state (timers + last known slide index). */
+  hintState(name) {
+    if (!this._arrowHint) this._arrowHint = {};
+    if (!this._arrowHint[name]) {
+      this._arrowHint[name] = {
+        showTimer: null,
+        hideTimer: null,
+        // Pending "show the next hint again after the 5s gap" timer.
+        loopTimer: null,
+        // Pending "resume the repeating loop once the gesture has settled" timer.
+        resumeTimer: null,
+        // True while the hint must keep repeating every (hint + 5s) while the
+        // modal stays open and untouched.
+        repeating: false,
+        lastIndex: null,
+      };
+    }
+    return this._arrowHint[name];
+  }
+
+  /** Clear all pending hint timers for one slider */
+  clearArrowHintTimers(name) {
+    const st = this.hintState(name);
+    if (st.showTimer) { clearTimeout(st.showTimer); st.showTimer = null; }
+    if (st.hideTimer) { clearTimeout(st.hideTimer); st.hideTimer = null; }
+    if (st.loopTimer) { clearTimeout(st.loopTimer); st.loopTimer = null; }
+    if (st.resumeTimer) { clearTimeout(st.resumeTimer); st.resumeTimer = null; }
+  }
+
+  /**
+   * Hide the hint arrows immediately.
+   * @param {string} name
+   * @param {boolean} [clearTimers=true] also drop any pending show/hide timer
+   */
+  hideArrowHint(name, clearTimers = true) {
+    if (clearTimers) this.clearArrowHintTimers(name);
+    const modal = this.getModalEl(name) || document;
+    modal.querySelectorAll(`[data-slider-arrows="${name}"]`).forEach(btn => {
+      // Cancel any in-flight animation as well, so a hint that is hidden
+      // mid-cycle cannot keep running (and cannot block the next restart).
+      this.restartCssAnimation(btn);
+      btn.classList.remove('is-hint', 'is-nudging');
+    });
+  }
+
+  /** Full reset: stop the timers, hide the arrows and forget the last index */
+  resetArrowHint(name) {
+    // Closing the modal / resetting the slider kills the whole repeat cycle.
+    this.stopArrowHintLoop(name);
+    this.hideArrowHint(name, true);
+    this.hintState(name).lastIndex = null;
+  }
+
+  /**
+   * Restart a CSS animation on `el` from frame 0, deterministically.
+   *
+   * The naive `classList.remove(); void el.offsetWidth; classList.add();` trick
+   * is unreliable: reading `offsetWidth` only flushes LAYOUT, while the browser
+   * may still coalesce the `animation-name` change (none -> <name>) inside the
+   * same frame, so on the 2nd and later hints the pulse/nudge simply never
+   * restarts (the arrow appears but stays still - "the sway works only once").
+   *
+   * `getComputedStyle(el).animationName` forces a STYLE recalc of the animation
+   * property itself, which the engine cannot coalesce, and cancelling any live
+   * animation via the Web Animations API guarantees a clean restart even when
+   * the hint is re-shown while the previous one is still mid-flight.
+   */
+  restartCssAnimation(el) {
+    if (!el) return;
+    // Drop any in-flight animations (nudge on the button, pulse on the <svg>,
+    // halo on the ::before) so nothing is left running from the previous hint.
+    // `subtree: true` + `pseudoElement` coverage is what cancels the child/pseudo
+    // animations too - otherwise a finished `forwards` pulse would not re-run.
+    if (typeof el.getAnimations === 'function') {
+      let animations = [];
+      try { animations = el.getAnimations({ subtree: true }); }
+      catch (_) { animations = []; }
+      if (!animations.length) {
+        try { animations = el.getAnimations(); } catch (_) { animations = []; }
+      }
+      animations.forEach(anim => {
+        try { anim.cancel(); } catch (_) { /* older engine - ignore */ }
+      });
+    }
+    // Force the animation-name to be recomputed (STYLE flush, not just layout).
+    void getComputedStyle(el).animationName;
+  }
+
+  /**
+   * Show the arrow(s) that match the AVAILABLE swipe directions for `durationMs`,
+   * then fade them out. Only directions the guest can actually take are hinted:
+   *   - first slide (index === 0)    -> ONLY the NEXT arrow (nothing to the left);
+   *   - last slide  (index === last) -> ONLY the PREV arrow (nothing to the right);
+   *   - middle slides                -> BOTH arrows, pulsing + swaying in sync;
+   *   - single slide                 -> no hint at all.
+   * `nudge` adds the gentle rocking on the hinted arrow(s) in their own direction.
+   * The default duration is exactly MODAL_HINT_DURATION_MS (3 full pulse cycles)
+   * plus a tiny grace, so the pulse never gets cut mid-cycle.
+   *
+   * When `st.repeating` is set (the modal is open and the guest is idle) the hint
+   * re-arms itself: it shows for one full hint, disappears, stays hidden for
+   * MODAL_HINT_GAP_MS (5s) and then shows again - forever, until scroll / swipe /
+   * arrow tap / modal close clears the timers and stops the loop.
+   */
+  showArrowHint(name, durationMs = null, nudge = true) {
+    const total = this.getSliderSlideCount(name);
+    if (total <= 1) return;
+    this.clearArrowHintTimers(name);
+
+    const index = this.getActiveSlideIndex(name);
+    const modal = this.getModalEl(name) || document;
+
+    // Collect the arrows to hint FIRST, then start every one of them in one
+    // synchronous pass so the pulse + nudge of both arrows begin in the SAME
+    // frame (perfectly synchronised sway) and each is restarted from frame 0.
+    const targets = [];
+    modal.querySelectorAll(`[data-slider-arrows="${name}"]`).forEach(btn => {
+      if (btn.classList.contains('hidden')) return;
+      const isPrev = btn.classList.contains('modal-nav-prev');
+      // Only the directions that are actually available from the current slide:
+      //  - the PREV arrow only when there is a slide to the left  (index > 0);
+      //  - the NEXT arrow only when there is a slide to the right (index < last);
+      //  => first slide -> next only, last slide -> prev only, middle -> both.
+      if (isPrev ? index <= 0 : index >= total - 1) return;
+      // Never hint an arrow that is currently unavailable (is-disabled) - e.g. a
+      // stale updateSliderUI pass must not leave a disabled arrow swaying.
+      if (btn.classList.contains('is-disabled')) return;
+      targets.push(btn);
+    });
+
+    if (!targets.length) return;
+
+    targets.forEach(btn => {
+      // 1. Clear the previous hint state so the CSS animation can restart.
+      btn.classList.remove('is-hint', 'is-nudging');
+      this.restartCssAnimation(btn);
+      // 2. Re-apply: `.is-hint` fades the arrow in and starts the pulse/halo,
+      //    `.is-nudging` adds the directional rock (both run 3 synced cycles).
+      btn.classList.add('is-hint');
+      btn.classList.toggle('is-nudging', nudge);
+    });
+
+    // Belt-and-braces: force one more style flush AFTER all classes are applied
+    // so the browser commits the freshly restarted animations this frame.
+    if (targets[0]) void getComputedStyle(targets[0]).animationName;
+
+    const st = this.hintState(name);
+    const holdMs = (durationMs || MODAL_HINT_DURATION_MS) + MODAL_HINT_GRACE_MS;
+    st.hideTimer = setTimeout(() => {
+      st.hideTimer = null;
+      this.hideArrowHint(name, false);
+      // Repeat while the modal is open and the guest is idle: after the hint has
+      // faded out, wait the 5s gap and show it again (tail-recursive). Any
+      // activity clears `loopTimer`/`repeating` and breaks the chain at once.
+      if (st.repeating) this.scheduleArrowHint(name, MODAL_HINT_GAP_MS);
+    }, holdMs);
+  }
+
+  /**
+   * Begin the repeating hint loop for an open modal: show the hint now (after the
+   * fade-in delay) and keep re-showing it every (hint + 5s gap) until the guest
+   * interacts or the modal closes. With a single slide the arrows are never
+   * hinted, so the loop is not armed at all.
+   * @param {number} [initialDelayMs=350] delay before the first hint.
+   * @param {boolean} [onlyOnFirstSlide=false] when true the very first hint is
+   *   skipped unless the slider is still on slide 1 (used right after opening, so
+   *   a guest who already swiped during the fade-in is not hinted).
+   */
+  startArrowHintLoop(name, initialDelayMs = 350, onlyOnFirstSlide = false) {
+    const total = this.getSliderSlideCount(name);
+    if (total <= 1) return; // single image -> never any arrows
+    const st = this.hintState(name);
+    st.repeating = true;
+    this.clearArrowHintTimers(name);
+    // Let the modal fade in first, then hint (and keep looping from then on).
+    st.showTimer = setTimeout(() => {
+      st.showTimer = null;
+      if (!st.repeating) return;
+      // Only the opening hint insists on slide 1; a resumed loop hints whichever
+      // slide the guest is on (so the available directions keep being shown).
+      if (onlyOnFirstSlide && this.getActiveSlideIndex(name) !== 0) return;
+      this.showArrowHint(name, MODAL_HINT_DURATION_MS, true);
+    }, initialDelayMs);
+  }
+
+  /**
+   * Stop the repeating hint loop and drop every pending timer.
+   * @param {boolean} [clearResume=true] also cancel a pending auto-resume, so a
+   *   modal close cannot be followed by a stray hint.
+   */
+  stopArrowHintLoop(name, clearResume = true) {
+    const st = this.hintState(name);
+    st.repeating = false;
+    if (st.loopTimer) { clearTimeout(st.loopTimer); st.loopTimer = null; }
+    if (clearResume && st.resumeTimer) { clearTimeout(st.resumeTimer); st.resumeTimer = null; }
+  }
+
+  /**
+   * Right after the modal opens: the slider is reset to the first slide, so
+   * gently reveal the "next" arrow for exactly three pulse cycles so the guest
+   * immediately sees that the slider can be swiped. The hint keeps repeating
+   * (5s gap) for as long as the modal stays open and the guest does nothing.
+   */
+  showArrowHintOnOpen(name) {
+    this.startArrowHintLoop(name, 350, true);
+  }
+  /**
+   * Idle reminder: after `delayMs` (5s by default) flash the arrows for the
+   * directions that are still available (~3 pulse cycles) - but only when the
+   * slider actually has more than one slide. On the FIRST slide that is the NEXT
+   * arrow, on the LAST slide the PREV arrow, and on a middle slide BOTH of them.
+   * Reuses the `loopTimer` slot so it never collides with the repeating cycle.
+   */
+  scheduleArrowHint(name, delayMs = MODAL_HINT_GAP_MS) {
+    const st = this.hintState(name);
+    if (st.loopTimer) { clearTimeout(st.loopTimer); st.loopTimer = null; }
+
+    const total = this.getSliderSlideCount(name);
+    if (total <= 1) return;
+
+    st.loopTimer = setTimeout(() => {
+      st.loopTimer = null;
+      const count = this.getSliderSlideCount(name);
+      // Re-check at fire time: a single slide can never be hinted.
+      if (count <= 1) return;
+      this.showArrowHint(name, MODAL_HINT_DURATION_MS, true);
+    }, delayMs);
+  }
+
+  /**
+   * User activity (scroll / swipe / arrow / dot / edge tap): cancel the pending
+   * hint and hide the arrows at once. While the modal stays OPEN the repeating
+   * cycle is resumed 5s later, so an idle guest keeps being reminded; closing the
+   * modal (`resetArrowHint`) stops it for good.
+   */
+  touchArrowHintActivity(name) {
+    this.stopArrowHintLoop(name, false);
+    this.clearArrowHintTimers(name);
+    this.hideArrowHint(name, false);
+
+    if (this.activeModal === name && this.getSliderSlideCount(name) > 1) {
+      const st = this.hintState(name);
+      st.resumeTimer = setTimeout(() => {
+        st.resumeTimer = null;
+        // Only while the modal is still open and untouched.
+        if (this.activeModal === name) this.startArrowHintLoop(name, MODAL_HINT_GAP_MS);
+      }, MODAL_HINT_GAP_MS);
+    }
+  }
+
+  /** Called by updateSliderUI whenever the snapped slide index changes */
+  onSlideIndexChanged(name, safeIndex) {
+    const st = this.hintState(name);
+    if (st.lastIndex !== safeIndex) {
+      st.lastIndex = safeIndex;
+      // A slide change invalidates the running hint: hide it and start over.
+      this.touchArrowHintActivity(name);
     }
   }
 
@@ -300,6 +692,8 @@ class BarMenuApp {
     if (!slider) return;
     const total = this.getSliderSlideCount(name);
     const target = Math.max(0, Math.min(index, total - 1));
+    // A dots/arrows jump is user activity: drop the hint before we animate.
+    this.touchArrowHintActivity(name);
     const step = this.getSliderStep(name);
     if (step <= 0) {
       // Layout not measured yet - nothing sane to scroll to.
@@ -314,6 +708,8 @@ class BarMenuApp {
   resetSlider(name) {
     const slider = document.getElementById(`${name}-content`);
     if (!slider) return;
+    // A reset invalidates every pending hint.
+    this.resetArrowHint(name);
     // Instant jump on open (no smooth animation while the modal is appearing).
     const behavior = slider.style.scrollBehavior;
     slider.style.scrollBehavior = 'auto';
@@ -329,13 +725,18 @@ class BarMenuApp {
     const modal = this.getModalEl(name) || document;
     if (!slider) return;
 
-    // Arrows (prev / next) - large, tap-friendly, sit above the slides.
+    // A pointer/finger press on the slider is activity -> cancel the hint.
+    slider.addEventListener('pointerdown', () => this.touchArrowHintActivity(name), { passive: true });
+
+    // Arrows (prev / next) - thin chevrons, tap-friendly, sit above the slides.
     // Bound via `[data-slider-arrows]` (not via the modal element) so a stray
     // duplicated `id` elsewhere in the page can never leave them unwired.
     modal.querySelectorAll(`[data-slider-arrows="${name}"]`).forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        // Any arrow click clears the hint immediately.
+        this.touchArrowHintActivity(name);
         const step = btn.classList.contains('modal-nav-prev') ? -1 : 1;
         this.scrollSliderTo(name, this.getActiveSlideIndex(name) + step);
       });
@@ -346,13 +747,93 @@ class BarMenuApp {
       dot.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
+        this.touchArrowHintActivity(name);
         this.scrollSliderTo(name, parseInt(dot.getAttribute('data-slide-to'), 10) || 0);
       });
     });
 
-    // Keep dots/counter/arrows in sync with the native horizontal scroll.
+    // Edge tap zones -> step prev/next, even while the chevron is invisible.
+    // A horizontal swipe may START on a zone (it covers the rim of the screen),
+    // so the gesture is only treated as a tap when the pointer barely moved and
+    // was released quickly; otherwise it is left to the native slider scroll.
+    // `touch-action: pan-x` on the zone (styles.css) keeps native swiping alive.
+    modal.querySelectorAll(`[data-slider-edge="${name}"]`).forEach(zone => {
+      let startX = 0;
+      let startY = 0;
+      let startTime = 0;
+      let tracking = false;
+
+      zone.addEventListener('pointerdown', (e) => {
+        tracking = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        startTime = Date.now();
+        // A press is user activity -> drop the hint (same as the slider itself).
+        this.touchArrowHintActivity(name);
+      });
+
+      zone.addEventListener('pointermove', (e) => {
+        if (!tracking) return;
+        // Moved too far -> this is a swipe/scroll, not a tap: stop tracking so
+        // the native horizontal scroll (started on this zone) is left alone.
+        if (Math.hypot(e.clientX - startX, e.clientY - startY) > MODAL_EDGE_TAP_MAX_MOVE_PX) {
+          tracking = false;
+        }
+      });
+
+      const cancel = () => { tracking = false; };
+      zone.addEventListener('pointercancel', cancel);
+      zone.addEventListener('pointerleave', cancel);
+
+      zone.addEventListener('pointerup', (e) => {
+        if (!tracking) return;
+        tracking = false;
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (Math.hypot(e.clientX - startX, e.clientY - startY) > MODAL_EDGE_TAP_MAX_MOVE_PX) return;
+        if (Date.now() - startTime > MODAL_EDGE_TAP_MAX_TIME_MS) return;
+
+        const isPrev = zone.getAttribute('data-edge-dir') === 'prev';
+        const total = this.getSliderSlideCount(name);
+        const index = this.getActiveSlideIndex(name);
+        // Only step in a direction that actually exists (guards the boundaries
+        // independently of the `is-disabled` styling).
+        if (total <= 1) return;
+        if (isPrev && index <= 0) return;
+        if (!isPrev && index >= total - 1) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        this.scrollSliderTo(name, index + (isPrev ? -1 : 1));
+      });
+
+      // Keyboard/AT support: the zones are focusable-prohibited (tabindex="-1")
+      // so Enter/Space on them is only reachable when a screen reader announces
+      // them; keep the activation semantics consistent in that case.
+      zone.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const isPrev = zone.getAttribute('data-edge-dir') === 'prev';
+        const index = this.getActiveSlideIndex(name);
+        if (this.getSliderSlideCount(name) <= 1) return;
+        e.preventDefault();
+        this.scrollSliderTo(name, index + (isPrev ? -1 : 1));
+      });
+    });
+
+    // Keep dots/counter/arrows in sync with the native horizontal scroll and
+    // (re)arm the repeating 5s hint loop once the scrolling has settled.
     let raf = null;
+    let idleTimer = null;
     slider.addEventListener('scroll', () => {
+      // Live scroll (swipe): stop the loop, hide the hint at once and postpone
+      // the next cycle until the gesture has settled.
+      this.touchArrowHintActivity(name);
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        idleTimer = null;
+        // Scroll stopped -> resume the repeating "there is more to swipe" hint
+        // (5s gap), but only while the modal is still open.
+        if (this.activeModal === name) this.startArrowHintLoop(name, MODAL_HINT_GAP_MS);
+      }, 150);
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = null;
@@ -364,20 +845,66 @@ class BarMenuApp {
   renderAllPriceTags() {
     if (!this.config?.sections) return;
 
+    // Build a lookup so the lazy observer can resolve an overlay back to its
+    // config image without re-scanning the whole config on every intersection.
+    this.priceDataByImageId = new Map();
     this.config.sections.forEach(section => {
-      section.images.forEach(img => {
-        // Use priceZones if available (new format with fontSize, color, textShadow), otherwise fall back to prices (legacy format)
-        let priceData = img.priceZones && img.priceZones.length > 0 ? img.priceZones : (img.prices || []);
-        
-        // Normalize: ensure all price objects have a 'price' property for rendering
-        priceData = priceData.map(p => ({
-          ...p,
-          price: p.price !== undefined ? p.price : (p.text || '')
-        }));
-        
-        this.renderPriceTags(img.id, priceData);
+      (section.images || []).forEach(img => {
+        this.priceDataByImageId.set(img.id, BarMenuApp.normalizePriceData(img));
       });
     });
+
+    const overlays = Array.from(document.querySelectorAll('.price-overlay[data-image-id]'));
+    if (!('IntersectionObserver' in window)) {
+      overlays.forEach(overlay => this.paintPriceOverlay(overlay));
+      return;
+    }
+
+    // Price tags are plain CSS-percentage boxes, so painting them is cheap - but
+    // doing it for EVERY image of a long menu at once stalls the first frames.
+    // They are painted only when the picture comes near the viewport, so a
+    // finger drag never competes with a burst of DOM work.
+    if (!this.priceObserver) {
+      this.priceObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          observer.unobserve(entry.target);
+          this.paintPriceOverlay(entry.target);
+        });
+      }, { rootMargin: '300px 0px 300px 0px' });
+    }
+
+    overlays.forEach(overlay => {
+      if (overlay.childElementCount > 0) return; // already painted
+      // Pictures already on screen are painted immediately (no flash of
+      // missing prices when the page opens scrolled down).
+      const wrapper = overlay.parentElement;
+      const r = wrapper ? wrapper.getBoundingClientRect() : null;
+      const nearViewport = r && r.bottom > -300 && r.top < (window.innerHeight || 0) + 300;
+      if (nearViewport) this.paintPriceOverlay(overlay);
+      else this.priceObserver.observe(overlay);
+    });
+  }
+
+  paintPriceOverlay(overlay) {
+    const imageId = overlay.getAttribute('data-image-id');
+    const prices = this.priceDataByImageId?.get(imageId);
+    if (!prices) return;
+    this.renderPriceTags(imageId, prices);
+  }
+
+  /**
+   * Price payload for one image: `priceZones` (new) wins, legacy `prices[]` is the
+   * fallback. Every entry is normalized to carry a `price` property.
+   */
+  static normalizePriceData(img) {
+    const source = (img?.priceZones && img.priceZones.length > 0)
+      ? img.priceZones
+      : (img?.prices || []);
+    return source.map(p => ({
+      ...p,
+      price: p.price !== undefined ? p.price : (p.text || '')
+    }));
   }
 
   renderPriceTags(imageId, prices) {
@@ -444,7 +971,15 @@ class BarMenuApp {
   // Keep all existing methods exactly as they were
 
   setupScrollListener() {
+    // Read-only, passive listeners: nothing here may call preventDefault (that
+    // would cancel the native touch scroll) nor touch layout during the gesture.
     window.addEventListener('scroll', () => this.onScroll(), { passive: true });
+    // A finger gesture takes over instantly: drop the programmatic smooth-scroll
+    // mode the moment the guest touches the screen, so the drag is 1:1 with the
+    // finger (no synthetic animation fighting the finger = no jitter).
+    const cancelSmooth = () => this.endSmoothScroll();
+    window.addEventListener('touchstart', cancelSmooth, { passive: true });
+    window.addEventListener('wheel', cancelSmooth, { passive: true });
   }
 
   setupResizeListener() {
@@ -453,6 +988,9 @@ class BarMenuApp {
     // Modal slider wrappers, however, are sized in px, so re-measure them.
     window.addEventListener('resize', () => this.sizeModalSliders(), { passive: true });
     window.addEventListener('orientationchange', () => setTimeout(() => this.sizeModalSliders(), 150));
+    // A picture finishing its download (mobile networks) changes the layout - the
+    // header state must be re-evaluated once, never during the load itself.
+    window.addEventListener('load', () => this.updateHeaderVisibility(), { passive: true });
   }
 
   /**
@@ -495,31 +1033,70 @@ class BarMenuApp {
   onScroll() {
     if (this.ticking) return;
     this.ticking = true;
-    
+
     requestAnimationFrame(() => {
       this.updateHeaderVisibility();
+      // A programmatic smooth scroll ends once the scroll position stops moving.
+      if (this.smoothScrollUntil && performance.now() > this.smoothScrollUntil) {
+        this.endSmoothScroll();
+      }
       this.ticking = false;
     });
   }
 
+  /**
+   * Programmatic smooth scrolling is OPT-IN per gesture (a nav button / anchor
+   * jump), never a global `scroll-behavior: smooth`. A global smooth behaviour on
+   * <html> also animates finger-driven scrolls on some engines - the scroll then
+   * "chases" the finger and snaps back and forth. Here the smooth mode lives only
+   * for the duration of the jump and is dropped on the first user gesture.
+   */
+  beginSmoothScroll(durationMs = 700) {
+    const root = document.documentElement;
+    root.classList.add('is-smooth-scrolling');
+    this.smoothScrollUntil = performance.now() + durationMs + 150;
+  }
+
+  endSmoothScroll() {
+    if (!this.smoothScrollUntil && !document.documentElement.classList.contains('is-smooth-scrolling')) return;
+    this.smoothScrollUntil = 0;
+    document.documentElement.classList.remove('is-smooth-scrolling');
+  }
+
+  /**
+   * The fixed header is measured AFTER its show/hide transition settles, so a
+   * jump never mixes a half-slid header height with the target offset.
+   * `headerHeight()` keeps the offset stable while the bar animates.
+   */
+  headerHeight() {
+    if (!this.header) return 0;
+    return this.headerVisible ? this.header.offsetHeight : 0;
+  }
+
   updateHeaderVisibility() {
     if (!this.heroSection || !this.header) return;
-    
+
     const heroRect = this.heroSection.getBoundingClientRect();
-    const heroBottom = heroRect.bottom;
-    
-    const shouldShow = heroBottom < 50;
-    
+
+    // Hysteresis: the bar appears a bit after the hero has left the screen and
+    // disappears a bit later again. A single threshold flips the bar back and
+    // forth on every other pixel of a slow drag (visible "twitching").
+    const SHOW_AT = 24;   // hero bottom above this -> show
+    const HIDE_AT = 84;   // hero bottom below this -> hide
+    const current = heroRect.bottom;
+    let shouldShow = this.headerVisible;
+
+    if (!this.headerVisible && current < SHOW_AT) shouldShow = true;
+    else if (this.headerVisible && current > HIDE_AT) shouldShow = false;
+
     if (shouldShow !== this.headerVisible) {
       this.headerVisible = shouldShow;
       if (shouldShow) {
         this.header.classList.add('header-visible');
         this.header.setAttribute('aria-hidden', 'false');
-        document.body.classList.add('header-visible');
       } else {
         this.header.classList.remove('header-visible');
         this.header.setAttribute('aria-hidden', 'true');
-        document.body.classList.remove('header-visible');
       }
     }
   }
@@ -605,10 +1182,12 @@ class BarMenuApp {
     const section = document.getElementById(sectionId);
     if (!section) return;
 
-    const headerHeight = this.headerVisible ? this.header.offsetHeight : 0;
+    const headerHeight = this.headerHeight();
     const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
-    const offsetTop = sectionTop - headerHeight;
+    const offsetTop = Math.max(0, sectionTop - headerHeight);
 
+    // Smooth animation only for this one jump; a touch cancels it instantly.
+    this.beginSmoothScroll();
     window.scrollTo({
       top: offsetTop,
       behavior: 'smooth'
@@ -623,6 +1202,9 @@ class BarMenuApp {
 
     this.scrollPosition = window.pageYOffset;
 
+    // Opening a full-screen modal interrupts any running page animation and
+    // locks the page exactly where it is.
+    this.endSmoothScroll();
     document.body.classList.add('modal-open');
     document.body.style.top = `-${this.scrollPosition}px`;
 
@@ -634,6 +1216,11 @@ class BarMenuApp {
 
     // The wrapper is only measurable once the modal is visible/laid out.
     requestAnimationFrame(() => this.sizeModalSliders());
+
+    // Opening hint: with 2+ slides, gently reveal the arrow(s) the guest can use
+    // and keep repeating the hint every (hint + 5s) for as long as the modal
+    // stays open, so the guest realises the slider can be swiped.
+    this.showArrowHintOnOpen(modalName);
     
     const backBtn = modal.querySelector('.back-btn');
     if (backBtn) {
@@ -650,13 +1237,22 @@ class BarMenuApp {
     const modal = this.getModalEl(modalName) || (modalName === 'promo' ? this.promoModal : this.birthdayModal);
     if (!modal) return;
 
+    // Closing the modal cancels all timers and hides the arrows at once.
+    this.resetArrowHint(modalName);
+
     modal.classList.add('hidden');
     modal.classList.remove('modal-enter');
 
     document.body.classList.remove('modal-open');
     const scrollPos = parseInt(document.body.style.top || '0', 10) * -1;
     document.body.style.top = '';
-    window.scrollTo(0, scrollPos);
+    // Restore instantly (`auto`): an animated restore while the modal disappears
+    // reads as the page sliding away on its own.
+    this.endSmoothScroll();
+    window.scrollTo({ top: scrollPos, left: 0, behavior: 'auto' });
+    // The header state depends on the restored position - resync it right away
+    // instead of waiting for the first scroll event.
+    this.updateHeaderVisibility();
 
     this.activeModal = null;
 

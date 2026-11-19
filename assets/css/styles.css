@@ -9,31 +9,108 @@
   display: none;
 }
 
-/* Smooth scroll behavior */
+/* Smooth scroll behavior - only for anchor/button navigation.
+   IMPORTANT: never use `scroll-behavior: smooth` as a global side effect of a
+   user gesture (finger drag). While a finger is dragging, a smooth (animated)
+   scroll on the root would fight the native touch scroll and produce the
+   "up-down jitter" reported between sections. The class below is only added
+   for the duration of a programmatic `scrollTo` (see app.js). */
 html {
+  scroll-behavior: auto;
+}
+
+html.is-smooth-scrolling {
   scroll-behavior: smooth;
 }
 
-/* Scroll margin for sections to account for header when visible */
+/* Keep the layout width stable when the body is locked (modal open) on
+   desktop browsers that reserve space for the classic scrollbar
+   (`scrollbar-gutter: stable` is declared once, together with the overflow
+   rules below - the root keeps a fixed gutter, so opening a modal never
+   reflows the content behind it). */
+
+/* Scroll margin for sections to account for the fixed header when visible.
+   This is used ONLY by anchor jumps - it never changes layout box sizes. */
 #food-section,
 #drinks-section {
   scroll-margin-top: 80px; /* Header height when visible + extra spacing */
 }
 
-/* Add padding to sections when header is visible to prevent content hiding behind header */
-body.header-visible #food-section,
-body.header-visible #drinks-section {
-  padding-top: 80px;
-}
+/* NOTE (touch-scroll stability):
+   The header must be OVERLAID, never push content. An earlier rule added
+   `padding-top: 80px` to the sections whenever the header became visible
+   (`body.header-visible`), which changed the document height by +/-80px in the
+   middle of a scroll and made the page jump ("дёргание" right at the
+   hero -> first section boundary). Content stays put; the small header simply
+   floats above it. */
 
-/* Header visibility states */
+/* Header visibility states.
+   Purely compositor-friendly: transform + opacity only, and it is `fixed`, so it
+   is out of the layout flow and can never shift the page while it slides. */
 #main-header {
   transform: translateY(-100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  contain: layout style;
+  /* It is a fixed overlay - a finger drag starting on the bar scrolls the page. */
+  touch-action: pan-y;
 }
 
 #main-header.header-visible {
   transform: translateY(0);
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------------ *
+ * Touch-scroll stability (iOS / Android)
+ * ------------------------------------------------------------------ */
+
+/* The document must scroll. Nothing on the way may clip the root scroller or
+   create a second, competing scroll container (a nested `overflow: auto/hidden`
+   ancestor with a non-visible overflow breaks `position: sticky`, steals the
+   finger gesture and produces the "stuck / jumpy" feel).
+   NOTE: no `overflow-x` here - the root already uses `overflow-x: clip`
+   (declared below), and `overflow-x: hidden` on <html> turns the root into a
+   scroll container on iOS, which disables progressive scroll restoration. */
+body {
+  overscroll-behavior-y: none; /* no chain-to-browser bounce that snaps back */
+}
+
+/* Never let scroll anchoring move the page: while `loading="lazy"` pictures
+   arrive (they have no width/height, so their box grows from 0 to N px) the
+   browser would otherwise re-anchor the scroll position and the page visibly
+   jumps mid-gesture. */
+html,
+body {
+  overflow-anchor: none;
+}
+
+/* The sections are long stacks of pictures: keep them on their own layout /
+   paint layers so a header slide-in or a lazy image landing does not force a
+   full-page relayout. `paint` containment does not affect sizing, so the price
+   overlay (absolute, inset: 0) keeps resolving against the image wrapper. */
+.menu-section {
+  contain: layout paint style;
+}
+
+/* `-webkit-user-drag` / `touch-callout` are not layout-affecting here: they only
+   suppress the long-press callout and image drag on a finger drag. */
+.image-wrapper img,
+.price-overlay img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+/* Images reserve their intrinsic box (`width`/`height` attributes in the markup,
+   plus `height: auto`) so a late-decoded picture cannot shift the layout and
+   `loading="lazy"` never changes the document height while the finger moves. */
+.image-wrapper > img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* Focus styles for accessibility */
@@ -132,11 +209,23 @@ input::placeholder {
   animation: slideUp 0.3s ease-out;
 }
 
-/* Prevent body scroll when modal is open */
+/* Prevent body scroll when modal is open.
+   `position: fixed` + `top: -scrollY` (set inline by app.js) is the iOS-proof
+   lock. The body keeps the full width, so the horizontal layout never reflows
+   (no sideways "jump" of the price/product columns) while the modal is open. */
 body.modal-open {
   overflow: hidden;
   position: fixed;
+  left: 0;
+  right: 0;
   width: 100%;
+  /* The page height is frozen - the root scroller must not stretch the
+     scrollbar gutter back in on desktop. */
+  scrollbar-gutter: auto;
+}
+
+body.modal-open > * {
+  overflow-anchor: none;
 }
 
 /* Hide header when modal is open */
@@ -156,10 +245,37 @@ button, a {
   color: #e94560;
 }
 
+/* Promo nav button (SPECIAL HIGHLIGHT)
+   The promo item is set apart in BOTH menus with the same animated gradient
+   (`.promo-text` + `bg-clip-text`, see the hero/vertical nav in app.js).
+   In the small horizontal header the gradient text needs a dark shadow to stay
+   legible over the translucent bar, and the generic white-text hover/active
+   rules must NOT repaint it (a solid colour would cover the clipped gradient,
+   so hover keeps the gradient and only brightens it with a glow). */
+.nav-btn-promo {
+  font-weight: 600;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.nav-btn-promo:hover {
+  color: transparent;
+  filter: brightness(1.18) drop-shadow(0 0 6px rgba(233, 69, 96, 0.5));
+}
+
+.nav-btn-promo.active {
+  color: transparent;
+  filter: brightness(1.25) drop-shadow(0 0 8px rgba(233, 69, 96, 0.6));
+}
+
 /* Horizontal page overflow safety: never allow horizontal scroll on the page itself.
-   `clip` does not create a scroll container (better than `hidden` for sticky/fixed). */
-html, body {
+   `clip` does not create a scroll container (better than `hidden` for sticky/fixed),
+   and it keeps `overflow-y: visible` on the root - the page must stay ONE native
+   vertical scroller. */
+html,
+body {
   overflow-x: clip;
+  overflow-y: visible;
+  scrollbar-gutter: stable;
 }
 
 /* Mobile (<768px): horizontal nav scrolls inside its own container, scrollbar hidden.
@@ -200,19 +316,24 @@ html, body {
   overscroll-behavior: contain;
 }
 
-/* Visual viewport adjustment for iOS */
+/* Visual viewport adjustment for iOS.
+   NOTE: the safe-area padding is applied ONLY to in-flow containers. The fixed
+   top bar (#main-header) is positioned by its own inner padding - giving it a
+   `padding-top: env(safe-area-inset-top)` here made the bar taller/shorter than
+   the value JS measures, so the sticky navigation "breathed" by a few pixels on
+   every show/hide. */
 @supports (padding: max(0px)) {
-  header {
-    padding-top: max(12px, env(safe-area-inset-top));
-  }
-  
-  .back-btn {
+  /* The outer, in-flow page container only (never the fixed #main-header). */
+  body > main,
+  body > footer {
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
   }
-  
-  main {
-    padding-bottom: max(80px, env(safe-area-inset-bottom));
+
+  #promo-modal .back-btn,
+  #birthday-modal .back-btn {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
   }
 }
 
@@ -263,6 +384,13 @@ html, body {
 #hero-landing {
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height for mobile */
+  /* The hero is exactly one screen tall. `contain: layout paint` keeps its
+     absolutely-positioned background picture on its own layer so the following
+     sections never re-paint it while the finger scrolls past the boundary. */
+  contain: layout paint;
+  /* One vertical finger gesture belongs to the page scroller; the hero (which
+     holds only buttons) never captures or cancels it. */
+  touch-action: pan-y;
 }
 
 #hero-landing > div:first-child {
@@ -613,6 +741,44 @@ html, body {
   }
 }
 
+/* ============================================================
+   Vertical (page) scrolling - stability rules
+   ============================================================ */
+
+/* The horizontal navigation strip inside the fixed header scrolls sideways
+   ONLY. Without this, a slightly diagonal finger drag aimed at the page could be
+   claimed by the strip (`overflow-x: auto`) and the menu would refuse to move
+   vertically - the classic "scroll gets stuck / rubber-bands" feeling. */
+#horizontal-nav {
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
+}
+
+/* Menu content (pictures + price overlays) never captures the vertical
+   gesture: the page scroller always wins a pan-y. */
+#main-content,
+#hero-landing,
+.menu-section,
+.image-wrapper {
+  touch-action: pan-y;
+}
+
+/* EXCEPTION - the modal slider is a HORIZONTAL scroller: its slides must pan-x.
+   `touch-action` is intersected along the hit-test chain, so the generic
+   `.image-wrapper { touch-action: pan-y }` above would otherwise kill the
+   native horizontal swipe on every modal slide (the wrapper is under the
+   finger, the slider is only its ancestor). Reset it back to pan-x for the
+   modal subtree so a finger drag scrolls the slider again. */
+.modal-slider .image-wrapper,
+.modal-slide .modal-image-wrapper {
+  touch-action: pan-x;
+}
+
+/* A programmatic smooth scroll must not inherit an "auto" root: app.js adds
+   `is-smooth-scrolling` to <html> only around scrollTo and removes it as soon
+   as the scroll settles, so the next finger drag is 1:1 with the finger again. */
+
 /* Image wrapper for price overlays */
 .image-wrapper {
   position: relative;
@@ -647,6 +813,12 @@ html, body {
   object-fit: contain;
   border-radius: 0;
   box-shadow: none;
+  /* The picture is the topmost hit target under the finger - it must delegate
+     the horizontal pan to the modal slider, never swallow it (no `manipulation`,
+     no `none`, no `pan-y` here). */
+  touch-action: pan-x;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
   /* The picture must stay maximally sharp above the modal's dark scrim:
      fully opaque, no filter/blur/opacity, and no backdrop-filter of its own
      (which would create a nested backdrop root and soften the rendering). */
@@ -1402,6 +1574,11 @@ button:disabled {
   background: rgba(12, 12, 22, 0.80) !important;
   -webkit-backdrop-filter: blur(5px);
   backdrop-filter: blur(5px);
+  /* One pulse of the arrow hint. The hint is shown for exactly 3 full cycles
+     (HINT_DURATION_MS in app.js == 3 * 1600ms), so the animation always plays
+     from start to end and fades out cleanly instead of being cut mid-cycle.
+     Inherited by the arrows, which live inside this element. */
+  --modal-hint-cycle: 1600ms;
 }
 
 /* Closed state wins over the Tailwind `flex` utility regardless of CDN order. */
@@ -1461,6 +1638,9 @@ button:disabled {
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   overscroll-behavior-x: contain;
+  /* This viewport scrolls sideways ONLY: keep the native horizontal pan alive
+     (never `none` / `pan-y`, which would make the finger swipe dead). */
+  touch-action: pan-x;
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -1492,7 +1672,14 @@ button:disabled {
   max-width: none !important;
   overflow-x: auto !important;
   overflow-y: hidden !important;
+  scroll-snap-type: x mandatory !important;
   scroll-behavior: smooth;
+  /* A swipe across a slide must scroll the slider natively. Declared with
+     !important because this by-ID block overrides the base `.modal-slider`
+     rule and a single `pan-y`/`none` here would freeze the finger swipe. */
+  touch-action: pan-x !important;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
   background: transparent !important;
   -webkit-backdrop-filter: none !important;
   backdrop-filter: none !important;
@@ -1517,6 +1704,9 @@ button:disabled {
   justify-content: center;
   padding: 8px;
   box-sizing: border-box;
+  /* The slide is a horizontal surface: horizontal panning belongs to the slider
+     (its ancestor scroll container), so the slide never blocks the swipe. */
+  touch-action: pan-x;
   /* Promoted to its own compositor layer for a buttery-smooth swipe/scroll. */
   transform: translateZ(0);
   background: transparent !important;
@@ -1537,84 +1727,260 @@ button:disabled {
   max-height: 100%;
   margin: 0 auto;
   container-type: inline-size;
+  /* The finger most often lands HERE: horizontal panning must reach the slider. */
+  touch-action: pan-x;
   background: transparent !important;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   filter: none;
 }
 
-/* Reserve some room for the arrows so the picture never hides behind them. */
+/* Reserve a little room for the arrows so the picture never hides behind them.
+   Kept small - the arrows are pure glyphs with a soft halo, not plashkas. */
 @media (min-width: 640px) {
   .modal-slide {
-    padding: 12px 64px;
+    padding: 12px 48px;
   }
 }
 
-/* Arrows: large (>= 44x44), contrast dark circle over light menu images. */
+/* Arrows: a bold white chevron with a dark core shadow + a soft white glow and
+   a borderless radial halo behind it. NO circular plate, no border and no
+   background - the halo fades to fully transparent at its rim, so it never
+   looks like a button but still reads clearly on dark pictures.
+   Idle state is always invisible (opacity:0, pointer-events:none) so the arrow
+   never covers the picture; JS reveals it with `.is-hint`, which also turns on
+   the gentle pulse + halo breathing (both fade out smoothly with the arrow).
+   `width/height` are forced with !important because the global
+   `@media (pointer: coarse) { button { min-width/min-height: 44px !important } }`
+   rule would otherwise inflate every arrow into a 44px invisible box. */
 .modal-nav-btn {
   position: absolute;
   top: 50%;
-  transform: translateY(-50%);
   z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-radius: 9999px;
-  background: rgba(20, 20, 35, 0.72);
-  -webkit-backdrop-filter: blur(4px);
-  backdrop-filter: blur(4px);
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: 38px;
+  max-height: 38px;
+  padding: 0 !important;
+  margin: 0;
+  border: none !important;
+  border-radius: 0;
+  background: none !important;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none !important;
   color: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
   cursor: pointer;
-  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  transition: background-color 0.2s ease, opacity 0.25s ease, transform 0.2s ease;
-}
-.modal-nav-btn svg {
-  width: 28px;
-  height: 28px;
-  stroke: #ffffff;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6));
-}
-.modal-nav-btn:hover {
-  background: rgba(20, 20, 35, 0.9);
-}
-.modal-nav-btn:active {
-  background: rgba(20, 20, 35, 0.95);
-}
-.modal-nav-prev {
-  left: max(8px, env(safe-area-inset-left));
-}
-.modal-nav-next {
-  right: max(8px, env(safe-area-inset-right));
+  /* Idle state: invisible, non-interactive - never covers the picture. */
+  opacity: 0;
+  pointer-events: none;
+  /* When hinted the arrow is a hit target over the slide: it must still let a
+     horizontal swipe reach the slider (its own tap is a plain click). */
+  touch-action: pan-x;
+  /* `transform` stays constant (vertical centering only, set per-arrow below);
+     visibility is animated through `opacity`. */
+  transition: opacity 0.4s ease;
 }
 
-/* Hidden on the first / last slide (and when there is only one image). */
+/* Soft, borderless halo behind the chevron: a radial gradient that is opaque
+   only in the very centre and fades to transparent at the rim. It is what makes
+   the arrow pop on dark photos without being a plate. The button establishes a
+   stacking context (position + z-index), so the -1 halo stays above the slide. */
+.modal-nav-btn::before {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(255, 255, 255, 0.30) 0%,
+    rgba(255, 255, 255, 0.17) 34%,
+    rgba(255, 255, 255, 0.06) 58%,
+    rgba(255, 255, 255, 0) 76%
+  );
+  opacity: 0;
+  transform: scale(0.72);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.modal-nav-btn svg {
+  width: 30px;
+  height: 30px;
+  /* Bolder chevron than the `stroke-width="2"` attribute in the markup (a CSS
+     property wins over the presentation attribute) so it never looks thin. */
+  stroke-width: 2.6;
+  stroke: #ffffff;
+  /* Dark core shadow + soft white glow => legible on light AND dark areas. */
+  filter:
+    drop-shadow(0 1px 3px rgba(0, 0, 0, 0.9))
+    drop-shadow(0 0 8px rgba(255, 255, 255, 0.45));
+  transition: filter 0.3s ease;
+}
+
+/* Visible state: shown by the open-hint / idle-reminder timer. */
+.modal-nav-btn.is-hint {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* Breathing halo: a soft pulse of the glow while the hint is visible.
+   `3 ... forwards` == exactly three full cycles whose 0%/100% frame equals the
+   static resting state below, so the pulse neither pops in nor cuts off - it
+   simply beats three times and settles back on the resting value until the
+   hint class is removed (then only `opacity` fades out, no jump). */
+.modal-nav-btn.is-hint::before {
+  opacity: 1;
+  transform: scale(1);
+  animation: modalArrowHalo var(--modal-hint-cycle, 1600ms) ease-in-out 3 forwards;
+}
+/* The chevron itself also rocks towards its own direction while the hint is
+   visible (next slides right, prev mirrors it to the left). */
+.modal-nav-btn.is-hint svg {
+  animation: modalArrowPulseNext var(--modal-hint-cycle, 1600ms) ease-in-out 3 forwards;
+}
+.modal-nav-prev.is-hint svg {
+  animation: modalArrowPulsePrev var(--modal-hint-cycle, 1600ms) ease-in-out 3 forwards;
+}
+.modal-nav-btn.is-hint:hover svg {
+  filter:
+    drop-shadow(0 1px 4px rgba(0, 0, 0, 0.95))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.6));
+}
+.modal-nav-prev {
+  left: max(6px, env(safe-area-inset-left));
+  transform: translateY(-50%);
+}
+.modal-nav-next {
+  right: max(6px, env(safe-area-inset-right));
+  transform: translateY(-50%);
+}
+
+/* Hidden on the first / last slide (and when there is only one image).
+   `is-disabled` is toggled by updateSliderUI() and forces the arrow out of the
+   visible state even if a hint timer is still running. */
 .modal-nav-btn.hidden {
   display: none !important;
 }
 .modal-nav-btn.is-disabled {
-  opacity: 0;
-  pointer-events: none;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Gentle rocking hint on the "next" arrow while more slides are available. */
-@keyframes modalArrowNudge {
-  0%, 100% { transform: translateY(-50%) translateX(0); }
-  50%      { transform: translateY(-50%) translateX(3px); }
+/* Soft breathing halo (only while `.is-hint` is set - removed when the hint
+   fades, so it disappears together with the arrow).
+   0%/100% == the resting `.is-hint::before` state (scale(1), opacity 1): the
+   pulse grows out of the resting look and returns to it, so three repetitions
+   read as one smooth beating and the arrow never visibly "snaps" back. */
+@keyframes modalArrowHalo {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.18); opacity: 0.82; }
 }
-.modal-fullscreen:not(.is-single) .modal-nav-next:not(.is-disabled) {
-  animation: modalArrowNudge 1.6s ease-in-out infinite;
+
+/* Gentle slide of the chevron itself towards its own direction (next = right,
+   mirrored for prev = left). Applied to the `svg`, NOT the button, so the
+   centering `transform: translateY(-50%)` on `.modal-nav-prev/-next` is never
+   reset and the vertical alignment stays intact. Same amplitude and duration as
+   the mirrored nudge, so both arrows rock symmetrically. */
+@keyframes modalArrowPulseNext {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(6px); }
 }
-.modal-nav-next:not(.is-disabled):hover,
-.modal-nav-next:not(.is-disabled):active {
-  animation: none;
+@keyframes modalArrowPulsePrev {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(-6px); }
+}
+
+/* Gentle nudge towards the arrow's own direction - applied as a short-lived
+   class so it never fights with the idle `transform: translateY(-50%)` used for
+   centering. Animating `margin-left` avoids resetting the centering transform,
+   so the arrow only rocks a few px and back.
+   Exactly 3 iterations over the same `--modal-hint-cycle` => the rocking is
+   perfectly in sync with the halo/pulse and ends where it started. */
+@keyframes modalArrowNudgeNext {
+  0%   { margin-left: 0; }
+  45%  { margin-left: 6px; }
+  70%  { margin-left: -1px; }
+  100% { margin-left: 0; }
+}
+/* Mirrored for the "previous" arrow on the last slide (rocks to the left). */
+@keyframes modalArrowNudgePrev {
+  0%   { margin-left: 0; }
+  45%  { margin-left: -6px; }
+  70%  { margin-left: 1px; }
+  100% { margin-left: 0; }
+}
+.modal-nav-next.is-nudging {
+  animation: modalArrowNudgeNext var(--modal-hint-cycle, 1600ms) ease-in-out 3 forwards;
+}
+.modal-nav-prev.is-nudging {
+  animation: modalArrowNudgePrev var(--modal-hint-cycle, 1600ms) ease-in-out 3 forwards;
+}
+
+/* ---------------------------------------------------------------------------
+   Edge tap zones: two invisible, always-tappable strips on the left / right rim
+   of the modal body. They let the guest step through the slides by tapping the
+   edge even when the chevron itself is currently hidden (arrows are invisible
+   in the idle state), and they guarantee a comfortable touch target
+   (>= 44x44px) while the visible chevron stays a slim glyph.
+   They sit BELOW the arrows / dots / counter (z-index 15 < 20) and below the
+   pinned header (z-index 30), so those keep working exactly as before, and
+   `touch-action: pan-x` lets horizontal swipes pass straight through to the
+   native slider scroll - only a real tap switches slides (enforced by the tap
+   heuristic in app.js).
+   --------------------------------------------------------------------------- */
+.modal-edge-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 15;
+  width: 44px;
+  min-width: 44px;
+  max-width: 15%;
+  height: auto;
+  min-height: 44px !important;
+  padding: 0;
+  margin: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  opacity: 0;
+  cursor: pointer;
+  touch-action: pan-x;
+  -webkit-tap-highlight-color: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+}
+@media (min-width: 640px) {
+  .modal-edge-zone {
+    width: 64px;
+    min-width: 64px !important;
+  }
+}
+.modal-edge-zone-prev {
+  left: 0;
+}
+.modal-edge-zone-next {
+  right: 0;
+}
+/* At the very first / last slide the corresponding zone is inert, so it can
+   never swallow a tap that the user meant for something else. */
+.modal-edge-zone.is-disabled {
+  pointer-events: none !important;
+}
+.modal-edge-zone:focus-visible {
+  opacity: 0 !important;
+  outline: none;
 }
 
 /* Bottom plashka with the dots and the "1 / N" counter.
@@ -1640,6 +2006,9 @@ button:disabled {
   backdrop-filter: blur(6px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
   line-height: 1;
+  /* The plashka floats over the bottom of the slide: a swipe starting on it must
+     still scroll the slider (a dot tap is a plain click). */
+  touch-action: pan-x;
 }
 .modal-fullscreen.is-single .modal-indicators {
   display: none;
@@ -1693,10 +2062,18 @@ button:disabled {
   color: rgba(255, 255, 255, 0.65);
 }
 
-/* Respect reduced motion: no arrow rocking. */
+/* Respect reduced motion: no arrow nudging, no pulse / halo breathing. */
 @media (prefers-reduced-motion: reduce) {
-  .modal-fullscreen:not(.is-single) .modal-nav-next {
+  .modal-nav-next.is-nudging,
+  .modal-nav-prev.is-nudging,
+  .modal-nav-btn.is-hint::before,
+  .modal-nav-btn.is-hint svg {
     animation: none;
+  }
+  .modal-nav-btn,
+  .modal-nav-btn::before,
+  .modal-nav-btn svg {
+    transition: opacity 0.01s linear;
   }
   .modal-slider {
     scroll-behavior: auto;

@@ -95,20 +95,24 @@
     <!-- Modal Content - horizontal swipe slider (filled from config) -->
     <div class="modal-body flex-1 relative min-h-0 flex items-center justify-center">
       <h2 id="promo-title" class="sr-only" data-i18n="promo.title">PROMO SET</h2>
-      <!-- Prev / Next arrows (shown only when more than one image) -->
+      <!-- Prev / Next arrows: thin chevrons, revealed only as a swipe hint -->
       <button type="button" class="modal-nav-btn modal-nav-prev" data-slider-arrows="promo" aria-label="Previous slide">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
       </button>
       <button type="button" class="modal-nav-btn modal-nav-next" data-slider-arrows="promo" aria-label="Next slide">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
       </button>
       <div id="promo-content" class="modal-slider">
         <!-- Dynamically rendered from config -->
       </div>
+      <!-- Edge tap zones: invisible >=44px strips that switch slides when the
+           guest taps the rim of the screen, even while the chevron is hidden -->
+      <button type="button" class="modal-edge-zone modal-edge-zone-prev" data-slider-edge="promo" data-edge-dir="prev" tabindex="-1" aria-label="Previous slide"></button>
+      <button type="button" class="modal-edge-zone modal-edge-zone-next" data-slider-edge="promo" data-edge-dir="next" tabindex="-1" aria-label="Next slide"></button>
       <!-- Bottom indicators: dots + counter -->
       <div class="modal-indicators" data-slider-dots="promo">
         <div class="modal-dots" data-slider-dots-list="promo"></div>
@@ -132,20 +136,24 @@
     <!-- Modal Content - horizontal swipe slider (filled from config) -->
     <div class="modal-body flex-1 relative min-h-0 flex items-center justify-center">
       <h2 id="birthday-title" class="sr-only" data-i18n="birthday.title">BIRTHDAY OFFER</h2>
-      <!-- Prev / Next arrows (shown only when more than one image) -->
+      <!-- Prev / Next arrows: thin chevrons, revealed only as a swipe hint -->
       <button type="button" class="modal-nav-btn modal-nav-prev" data-slider-arrows="birthday" aria-label="Previous slide">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
         </svg>
       </button>
       <button type="button" class="modal-nav-btn modal-nav-next" data-slider-arrows="birthday" aria-label="Next slide">
-        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
         </svg>
       </button>
       <div id="birthday-content" class="modal-slider">
         <!-- Dynamically rendered from config -->
       </div>
+      <!-- Edge tap zones: invisible >=44px strips that switch slides when the
+           guest taps the rim of the screen, even while the chevron is hidden -->
+      <button type="button" class="modal-edge-zone modal-edge-zone-prev" data-slider-edge="birthday" data-edge-dir="prev" tabindex="-1" aria-label="Previous slide"></button>
+      <button type="button" class="modal-edge-zone modal-edge-zone-next" data-slider-edge="birthday" data-edge-dir="next" tabindex="-1" aria-label="Next slide"></button>
       <!-- Bottom indicators: dots + counter -->
       <div class="modal-indicators" data-slider-dots="birthday">
         <div class="modal-dots" data-slider-dots-list="birthday"></div>

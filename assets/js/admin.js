@@ -75,6 +75,39 @@ class AdminPanel {
     ensure(this.config.navigation.vertical, 'mic');
   }
 
+  // Ensure the PROMO SET button exists in both navigations (migration for configs
+  // saved before it was (re)introduced). It always sits right after DRINKS, before
+  // BIRTHDAY OFFER, and keeps the special gradient highlight handled by the client
+  // (`.nav-btn-promo` / `.promo-text` in styles.css + app.js renderNavigation()).
+  ensurePromoNav() {
+    if (!this.config || !this.config.navigation) return;
+    const ensure = (arr, icon) => {
+      if (!Array.isArray(arr)) return;
+      if (arr.some(b => b.id === 'promo')) return;
+      const btn = { id: 'promo', labelKey: 'nav.promo', target: 'promo-modal' };
+      if (icon) btn.icon = icon;
+      const idx = arr.findIndex(b => b.id === 'drinks');
+      arr.splice(idx === -1 ? arr.length : idx + 1, 0, btn);
+    };
+    ensure(this.config.navigation.horizontal);
+    ensure(this.config.navigation.vertical, 'flame');
+  }
+
+  // Ensure the empty PROMO SET modal section always exists (migration for configs
+  // saved before it was (re)introduced). It is a MODAL section: its content lives
+  // inside #promo-modal and is filled manually with images + price tags from the
+  // Images tab, exactly like birthday-modal.
+  ensurePromoSection() {
+    if (!this.config) return;
+    if (!Array.isArray(this.config.sections)) this.config.sections = [];
+    if (!this.config.sections.some(s => s.id === 'promo-modal')) {
+      const idx = this.config.sections.findIndex(s => s.id === 'birthday-modal');
+      const section = { id: 'promo-modal', titleKey: 'promo.title', images: [] };
+      if (idx === -1) this.config.sections.push(section);
+      else this.config.sections.splice(idx, 0, section);
+    }
+  }
+
   // "MENU" hero title switch. Defaults to ON for configs saved before it existed,
   // so the title keeps showing until the admin explicitly turns it off.
   // Also migrates the visual style option (gold | neon | editorial | glass).
@@ -97,6 +130,8 @@ class AdminPanel {
       if (!response.ok) throw new Error('Failed to load config');
       this.config = await response.json();
       this.ensureHeroSection();
+      this.ensurePromoNav();
+      this.ensurePromoSection();
       this.ensureKaraokeNav();
       this.ensureMenuTitle();
     } catch (error) {
@@ -416,7 +451,7 @@ class AdminPanel {
             <h3 class="font-semibold text-lg">${section.titleKey || section.id} ${badge}</h3>
             <div class="flex items-center gap-2">
               <span class="text-xs text-white/40 px-2 py-1 bg-white/5 rounded">${section.images?.length || 0} images</span>
-              ${isHero ? '' : `<button class="btn-delete-section p-2 text-white/40 hover:text-red-400 hover:bg-red-500/20 rounded transition-colors bg-white/5 border border-white/10" data-section-id="${section.id}" title="Delete entire section and all its images"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v12m-6 0h12"/></svg></button>`}
+              ${isHero ? '' : `<button class="btn-clear-section-images p-2 text-white/40 hover:text-red-400 hover:bg-red-500/20 rounded transition-colors bg-white/5 border border-white/10" data-section-id="${section.id}" title="Delete all images in this section (keeps the section)"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v12m-6 0h12"/></svg></button>`}
             </div>
           </div>
           <div class="sortable-images grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3" data-section-id="${section.id}">
@@ -433,8 +468,8 @@ class AdminPanel {
     document.querySelectorAll('.btn-delete-image').forEach(btn => {
       btn.addEventListener('click', (e) => { e.stopPropagation(); this.confirmDelete(btn.dataset.sectionId, btn.dataset.imageId); });
     });
-    document.querySelectorAll('.btn-delete-section').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); this.confirmDeleteSection(btn.dataset.sectionId); });
+    document.querySelectorAll('.btn-clear-section-images').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); this.confirmClearSectionImages(btn.dataset.sectionId); });
     });
 
     document.querySelectorAll('.sortable-images').forEach(container => {
@@ -549,15 +584,22 @@ class AdminPanel {
     });
   }
 
-  confirmDeleteSection(sectionId) {
+  // Clear ALL images of a section but keep the section itself (and its structure,
+  // navigation entries and any other section) untouched. Upload stays available
+  // right away because the section is only emptied, never removed.
+  confirmClearSectionImages(sectionId) {
     const section = this.config.sections.find(s => s.id === sectionId);
-    const imageCount = section?.images?.length || 0;
-    this.showConfirm('Delete Section', `Delete entire "${section?.titleKey || sectionId}" section? This will delete all ${imageCount} images.`, async () => {
-      this.config.sections = this.config.sections.filter(s => s.id !== sectionId);
-      ['horizontal', 'vertical'].forEach(navType => { this.config.navigation[navType] = this.config.navigation[navType].filter(btn => btn.target !== sectionId); });
-      await this.saveConfig();
-      this.renderImagesTab(); this.renderNavigationTab();
-      this.showToast('Section deleted', 'success');
+    if (!section) return;
+    const imageCount = section.images?.length || 0;
+    if (imageCount === 0) { this.showToast('Section has no images', 'info'); return; }
+    this.showConfirm('Delete All Images', `Delete all ${imageCount} images in "${section?.titleKey || sectionId}"? The section itself will be kept.`, async () => {
+      const target = this.config.sections.find(s => s.id === sectionId);
+      if (target) {
+        target.images = [];
+        await this.saveConfig();
+        this.renderImagesTab();
+        this.showToast(`All ${imageCount} image(s) deleted from ${target.titleKey || sectionId}`, 'success');
+      }
     });
   }
 
@@ -911,7 +953,7 @@ setPriceEditorMode(mode) {
       id: `zone-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       x_percent, y_percent, w_percent, h_percent,
       text: '',
-      fontSize: 20,
+      fontSize: 24,
       color: '#000000',
       textShadow: false,
       bold: true,
@@ -939,7 +981,7 @@ setPriceEditorMode(mode) {
     // Reflect the selected zone's style in the controls (toolbar + sidebar)
     const zone = this.priceEditorZones.find(z => z.id === zoneId);
     if (zone) {
-      const sizeValue = String(zone.fontSize || 20);
+      const sizeValue = String(zone.fontSize || 24);
       document.querySelectorAll('.js-price-font-size').forEach(el => {
         if ([...el.options].some(o => o.value === sizeValue)) el.value = sizeValue;
       });
@@ -1044,7 +1086,7 @@ setPriceEditorMode(mode) {
     // Zones are positioned with plain CSS percentages relative to the overlay,
     // which exactly matches the image area (inset:0). No px conversion needed.
     overlay.innerHTML = this.priceEditorZones.map(zone => {
-      const fontSize = zone.fontSize || 20;
+      const fontSize = zone.fontSize || 24;
       // Same fluid formula as the client: px -> cqw relative to the container
       // (== image width), so admin preview matches the visitor 1:1.
       const cqw = AdminPanel.fontSizeToCqw(fontSize);
