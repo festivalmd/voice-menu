@@ -579,8 +579,16 @@ class AdminPanel {
     const section = this.config.sections.find(s => s.id === sectionId);
     const image = section?.images?.find(i => i.id === imageId);
     this.showConfirm('Delete Image', `Are you sure you want to delete "${image?.alt || imageId}"?`, async () => {
-      const section = this.config.sections.find(s => s.id === sectionId);
-      if (section) { section.images = section.images.filter(i => i.id !== imageId); await this.saveConfig(); this.renderImagesTab(); this.showToast('Image deleted', 'success'); }
+      const target = this.config.sections.find(s => s.id === sectionId);
+      // Only the IMAGE is removed (or the single entry filtered out): the section
+      // itself is NEVER dropped from config.sections - when its last image goes,
+      // it stays in the list with `images: []` so it can be refilled at any time.
+      if (target) {
+        target.images = (Array.isArray(target.images) ? target.images : []).filter(i => i.id !== imageId);
+        await this.saveConfig();
+        this.renderImagesTab();
+        this.showToast('Image deleted', 'success');
+      }
     });
   }
 
@@ -595,6 +603,8 @@ class AdminPanel {
     this.showConfirm('Delete All Images', `Delete all ${imageCount} images in "${section?.titleKey || sectionId}"? The section itself will be kept.`, async () => {
       const target = this.config.sections.find(s => s.id === sectionId);
       if (target) {
+        // Empty the array but KEEP the section in config.sections (never spliced
+        // out), so it keeps its place, navigation entry and upload target.
         target.images = [];
         await this.saveConfig();
         this.renderImagesTab();
