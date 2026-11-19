@@ -216,7 +216,7 @@ class BarMenuApp {
       .filter(section => section.id !== 'hero-section' && !BarMenuApp.isModalSection(section))
       .map(section => {
       return `
-        <section id="${section.id}" class="menu-section px-4" aria-labelledby="${section.id}-title">
+        <section id="${section.id}" class="menu-section" aria-labelledby="${section.id}-title">
           <h2 id="${section.id}-title" class="sr-only" data-i18n="${section.titleKey}">${section.id.toUpperCase()}</h2>
           <div class="space-y-4">
             ${section.images.map(img => {
@@ -977,7 +977,12 @@ class BarMenuApp {
     // A finger gesture takes over instantly: drop the programmatic smooth-scroll
     // mode the moment the guest touches the screen, so the drag is 1:1 with the
     // finger (no synthetic animation fighting the finger = no jitter).
-    const cancelSmooth = () => this.endSmoothScroll();
+    // A two-finger pinch (touches.length > 1) is NOT a scroll gesture: it must
+    // not be treated as one, and it must never be cancelled.
+    const cancelSmooth = (e) => {
+      if (e && e.touches && e.touches.length > 1) return;
+      this.endSmoothScroll();
+    };
     window.addEventListener('touchstart', cancelSmooth, { passive: true });
     window.addEventListener('wheel', cancelSmooth, { passive: true });
   }

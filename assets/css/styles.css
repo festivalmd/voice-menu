@@ -96,6 +96,23 @@ body {
   contain: layout paint style;
 }
 
+/* Standard vertical rhythm between menu sheets (sections).
+   The section wrapper carries NO vertical padding, so the gap between two
+   consecutive sheets is exactly this margin. The first section gets its top
+   spacing from <main>'s own padding instead (`> .menu-section:first-child`),
+   so the step hero -> food stays the same as every other step. */
+.menu-section {
+  margin: 0 0 32px;
+}
+
+.menu-section:last-child {
+  margin-bottom: 0;
+}
+
+#main-menu-container > .menu-section:first-child {
+  margin-top: 0;
+}
+
 /* `-webkit-user-drag` / `touch-callout` are not layout-affecting here: they only
    suppress the long-press callout and image drag on a finger drag. */
 .image-wrapper img,
@@ -756,12 +773,22 @@ body {
 }
 
 /* Menu content (pictures + price overlays) never captures the vertical
-   gesture: the page scroller always wins a pan-y. */
+   gesture: the page scroller always wins a pan-y.
+   `pan-y pinch-zoom` keeps the native two-finger pinch-to-zoom on the menu
+   pictures. The browser intersects touch-action along the hit-test chain, so a
+   bare `pan-y` here (and on .image-wrapper img below) disabled pinch entirely. */
 #main-content,
 #hero-landing,
 .menu-section,
 .image-wrapper {
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
+}
+
+/* The <img> itself is the topmost hit target under a finger on the menu pages:
+   it must allow both the vertical pan and pinch-zoom. It stays `none` in the
+   modal slider (rule below / .modal-slide-img), where a horizontal swipe rules. */
+.image-wrapper img {
+  touch-action: pan-y pinch-zoom;
 }
 
 /* EXCEPTION - the modal slider is a HORIZONTAL scroller: its slides must pan-x.
